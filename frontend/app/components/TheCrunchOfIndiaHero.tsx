@@ -394,10 +394,6 @@ export default function TheCrunchOfIndiaHero() {
                 }}
                 className="hidden lg:flex absolute left-4 xl:left-8 top-10 flex-col items-center opacity-65 hover:opacity-100 transition-all duration-500 scale-75 cursor-pointer -rotate-6 z-10 group"
               >
-                {/* Floating Chili / Ingredient */}
-                <span className="text-3xl absolute -top-4 -left-2 animate-bounce drop-shadow-md">
-                  {item.floatingIngredient}
-                </span>
                 <div className="relative w-[180px] h-[220px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
@@ -421,10 +417,6 @@ export default function TheCrunchOfIndiaHero() {
                 onClick={goToPrev}
                 className="hidden md:flex absolute left-[13%] lg:left-[18%] top-8 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-85 sm:scale-90 cursor-pointer -rotate-3 z-15 group"
               >
-                {/* Floating Herb / Leaves */}
-                <span className="text-2xl absolute -top-3 right-0 animate-pulse drop-shadow-md">
-                  {item.floatingIngredient}
-                </span>
                 <div className="relative w-[210px] h-[260px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
@@ -490,14 +482,6 @@ export default function TheCrunchOfIndiaHero() {
                 </AnimatePresence>
               </div>
             </div>
-
-            {/* Floating Ingredient Emblems */}
-            <span className="absolute -top-3 left-4 text-3xl animate-bounce drop-shadow-md">
-              {activeFlavor.floatingIngredient}
-            </span>
-            <span className="absolute -top-2 right-4 text-2xl animate-pulse drop-shadow-md">
-              {activeFlavor.floatingIngredient}
-            </span>
           </div>
 
           {/* ===================================== */}
@@ -510,10 +494,6 @@ export default function TheCrunchOfIndiaHero() {
                 onClick={goToNext}
                 className="hidden md:flex absolute right-[13%] lg:right-[18%] top-8 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-85 sm:scale-90 cursor-pointer rotate-3 z-15 group"
               >
-                {/* Floating Cumin/Ingredient */}
-                <span className="text-2xl absolute -top-3 left-0 animate-pulse drop-shadow-md">
-                  {item.floatingIngredient}
-                </span>
                 <div className="relative w-[210px] h-[260px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
@@ -543,10 +523,6 @@ export default function TheCrunchOfIndiaHero() {
                 }}
                 className="hidden lg:flex absolute right-4 xl:right-8 top-10 flex-col items-center opacity-65 hover:opacity-100 transition-all duration-500 scale-75 cursor-pointer rotate-6 z-10 group"
               >
-                {/* Floating Garlic/Ingredient */}
-                <span className="text-3xl absolute -top-4 right-0 animate-bounce drop-shadow-md">
-                  {item.floatingIngredient}
-                </span>
                 <div className="relative w-[180px] h-[220px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
