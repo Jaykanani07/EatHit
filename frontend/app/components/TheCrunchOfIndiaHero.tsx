@@ -7,8 +7,6 @@ import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
-  Search,
-  MapPin,
   Leaf,
   Wheat,
   Flame,
@@ -31,50 +29,50 @@ const FLAVORS: FlavorItem[] = [
   {
     id: "plain",
     name: "Plain Khakhra",
-    packetImg: "/images/products/plain-packet.png",
+    packetImg: "/images/products/plain-pouch.png",
     discImg: "/images/products/plain-khakhra.png",
     color: "#EAB308",
-    glowColor: "rgba(234, 179, 8, 0.28)",
+    glowColor: "rgba(234, 179, 8, 0.22)",
     floatingIngredient: "🌾",
     ingredientName: "Golden Wheat",
   },
   {
     id: "masala",
     name: "Masala Khakhra",
-    packetImg: "/images/products/masala-packet.png",
+    packetImg: "/images/products/masala-pouch.png",
     discImg: "/images/products/masala-khakhra.png",
     color: "#DC2626",
-    glowColor: "rgba(220, 38, 38, 0.28)",
+    glowColor: "rgba(220, 38, 38, 0.22)",
     floatingIngredient: "🌶️",
     ingredientName: "Kashmiri Chili",
   },
   {
     id: "methi",
     name: "Methi Khakhra",
-    packetImg: "/images/products/methi-packet.png",
+    packetImg: "/images/products/methi-pouch.png",
     discImg: "/images/products/methi-khakhra.png",
     color: "#16A34A",
-    glowColor: "rgba(22, 163, 74, 0.28)",
+    glowColor: "rgba(22, 163, 74, 0.22)",
     floatingIngredient: "🌿",
     ingredientName: "Kasuri Methi",
   },
   {
     id: "jeera",
     name: "Jeera Khakhra",
-    packetImg: "/images/products/jeera-packet.png",
+    packetImg: "/images/products/jeera-pouch.png",
     discImg: "/images/products/jeera-khakhra.png",
     color: "#D97706",
-    glowColor: "rgba(217, 119, 6, 0.28)",
+    glowColor: "rgba(217, 119, 6, 0.22)",
     floatingIngredient: "✨",
     ingredientName: "Roasted Cumin",
   },
   {
     id: "lasun",
     name: "Lasun Khakhra",
-    packetImg: "/images/products/lasan-packet.png",
+    packetImg: "/images/products/lasun-pouch.png",
     discImg: "/images/products/lasan-khakhra.png",
     color: "#EA580C",
-    glowColor: "rgba(234, 88, 12, 0.28)",
+    glowColor: "rgba(234, 88, 12, 0.22)",
     floatingIngredient: "🧄",
     ingredientName: "Roasted Garlic",
   },
@@ -216,22 +214,28 @@ export default function TheCrunchOfIndiaHero() {
   };
 
   return (
-    <section className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden text-[#2B1810] select-none">
+    <section className="relative w-full h-full max-h-screen flex flex-col justify-between overflow-hidden text-[#2B1810] select-none py-1.5 sm:py-3 px-3 sm:px-8">
       {/* ========================================================= */}
-      {/* 1. PHOTOREALISTIC WARM DESERT & STONE BACKDROP */}
+      {/* 1. LUXURY EDITORIAL FOOD STUDIO BACKDROP */}
       {/* ========================================================= */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/hero-desert-stone-bg.jpg"
-          alt="Desert studio backdrop"
+          src="/images/hero-luxury-desert-bg.jpg"
+          alt="Luxury desert food studio backdrop"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-bottom brightness-[1.02] contrast-[1.02]"
+          className="object-cover object-center brightness-[1.03] contrast-[1.01]"
         />
-        {/* Warm Golden Sunlight Gradients to Blend Top & Bottom Seamlessly */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF4EC]/85 via-[#F4E9DC]/35 to-[#EAE0D2]/75 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(43,24,16,0.12)_100%)] pointer-events-none" />
+        {/* Soft Golden Sunlight & Top/Bottom Vignette Blends */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF4EC]/80 via-transparent to-[#EAE0D2]/55 pointer-events-none" />
+        {/* Dynamic Flavor Halo Glow behind Active Product */}
+        <div
+          className="absolute inset-0 transition-opacity duration-700 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse 65% 55% at 50% 55%, ${activeFlavor.glowColor}, transparent 70%)`,
+          }}
+        />
       </div>
 
       {/* ========================================================= */}
@@ -275,29 +279,27 @@ export default function TheCrunchOfIndiaHero() {
       </div>
 
       {/* ========================================================= */}
-      {/* 3. TOP NAVIGATION BAR (EXACTLY AS IN MOCKUP) */}
+      {/* 3. TOP NAVIGATION BAR (CENTERED WITH BALANCED SIDES) */}
       {/* ========================================================= */}
-      <header className="relative z-30 w-full pt-4 sm:pt-6 px-4 sm:px-10 max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left: Authentic EAT HIT Lite Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#1C120D] text-white flex flex-col items-center justify-center shadow-lg relative border-2 border-[#EAB308]/60 group-hover:scale-105 transition-transform">
-            <span className="text-[9px] font-semibold text-white/70 tracking-widest absolute top-1.5 right-2">
-              TM
-            </span>
-            <span className="font-black text-sm sm:text-base leading-none tracking-tighter text-white">
-              EAT
-            </span>
-            <span className="font-black text-sm sm:text-base leading-none tracking-tighter text-[#EAB308]">
-              HIT
-            </span>
-            <span className="text-[10px] font-bold text-[#0D9488] italic tracking-tight font-[family-name:var(--font-caveat)] -mt-0.5">
-              Lite
-            </span>
-          </div>
-        </Link>
+      <header className="relative z-30 w-full pt-1.5 px-4 sm:px-10 max-w-7xl mx-auto flex items-center justify-between shrink-0">
+        {/* Left: Official EatHit Brand Logo */}
+        <div className="flex-1 flex items-center justify-start">
+          <Link href="/" className="flex items-center gap-2 group" aria-label="EatHit Home">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden shadow-md border-2 border-[#EAB308]/70 group-hover:scale-105 transition-transform bg-[#105E34]">
+              <Image
+                src="/810319879_18115925035810617_1916739058068536558_n.jpg"
+                alt="EatHit Official Logo"
+                fill
+                priority
+                sizes="(max-width: 768px) 48px, 56px"
+                className="object-cover"
+              />
+            </div>
+          </Link>
+        </div>
 
-        {/* Center: Main Navigation Menu */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-[#2B1810]">
+        {/* Center: Main Navigation Menu (Centered) */}
+        <nav className="hidden md:flex items-center justify-center gap-9 text-xs sm:text-sm font-semibold text-[#2B1810]">
           <Link
             href="/"
             className="relative py-1 text-[#2B1810] font-bold after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#A82810]"
@@ -307,9 +309,6 @@ export default function TheCrunchOfIndiaHero() {
           <Link href="#products" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
             Products
           </Link>
-          <Link href="#story" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
-            Our Story
-          </Link>
           <Link href="#store-locator" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
             Find a Store
           </Link>
@@ -318,35 +317,17 @@ export default function TheCrunchOfIndiaHero() {
           </Link>
         </nav>
 
-        {/* Right: Search & "Find a Store" Action Button */}
-        <div className="flex items-center gap-3">
-          <button
-            className="w-10 h-10 rounded-full bg-white/70 hover:bg-white text-[#2B1810] flex items-center justify-center transition-colors shadow-sm"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4 text-[#2B1810]" />
-          </button>
-          <Link
-            href="#store-locator"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1C120D] hover:bg-[#A82810] text-white text-xs font-bold tracking-wider transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            <MapPin className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>Find a Store</span>
-          </Link>
-        </div>
+        {/* Right: Invisible Balance Spacer for Perfect Centering */}
+        <div className="flex-1 hidden md:flex items-center justify-end" />
       </header>
 
       {/* ========================================================= */}
-      {/* 4. HERO HEADLINE (FROM MOCKUP) */}
+      {/* 4. HERO HEADLINE */}
       {/* ========================================================= */}
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-3 sm:pt-4">
-        <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.3em] text-[#6E4F3A] mb-1">
-          TRADITIONAL &nbsp;•&nbsp; CRISPY &nbsp;•&nbsp; EVERYDAY GOODNESS
-        </p>
-
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight font-[family-name:var(--font-outfit)] leading-[0.9] text-[#2B1810]">
+      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 pt-1 sm:pt-2 shrink-0">
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-black uppercase tracking-tight font-[family-name:var(--font-outfit)] leading-[0.84] text-[#2B1810]">
           THE CRUNCH <br />
-          <span className="inline-block text-[#C87A1E] font-[family-name:var(--font-caveat)] capitalize text-5xl sm:text-7xl md:text-8xl -rotate-2 -mt-2 sm:-mt-3 drop-shadow-sm">
+          <span className="inline-block text-[#C87A1E] font-[family-name:var(--font-caveat)] capitalize text-5xl sm:text-7xl md:text-8xl lg:text-[6.2rem] -rotate-2 -mt-2 sm:-mt-3.5 drop-shadow-sm">
             Of India
           </span>
         </h1>
@@ -355,29 +336,29 @@ export default function TheCrunchOfIndiaHero() {
       {/* ========================================================= */}
       {/* 5. 5-PRODUCT PANORAMA STAGE WITH ROLLING ANIMATIONS */}
       {/* ========================================================= */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 flex items-center justify-center my-auto min-h-[380px] sm:min-h-[460px]">
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 flex-1 min-h-0 flex items-center justify-center my-0">
         {/* Left Arrow Button */}
         <button
           onClick={goToPrev}
           disabled={isAnimating}
-          className="absolute left-2 sm:left-6 z-40 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/80 hover:bg-white text-[#2B1810] backdrop-blur-md shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/60"
+          className="absolute left-2 sm:left-6 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/80 hover:bg-white text-[#2B1810] backdrop-blur-md shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/60"
           aria-label="Previous Flavor"
         >
-          <ChevronLeft className="w-6 h-6 text-[#2B1810]" />
+          <ChevronLeft className="w-5 h-5 text-[#2B1810]" />
         </button>
 
         {/* Right Arrow Button */}
         <button
           onClick={goToNext}
           disabled={isAnimating}
-          className="absolute right-2 sm:right-6 z-40 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/80 hover:bg-white text-[#2B1810] backdrop-blur-md shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/60"
+          className="absolute right-2 sm:right-6 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/80 hover:bg-white text-[#2B1810] backdrop-blur-md shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/60"
           aria-label="Next Flavor"
         >
-          <ChevronRight className="w-6 h-6 text-[#2B1810]" />
+          <ChevronRight className="w-5 h-5 text-[#2B1810]" />
         </button>
 
         {/* Panoramic Showcase Container */}
-        <div className="relative w-full h-[360px] sm:h-[440px] flex items-center justify-center">
+        <div className="relative w-full h-full max-h-[360px] sm:max-h-[410px] flex items-center justify-center">
           {/* ===================================== */}
           {/* FAR LEFT PRODUCT (Offset -2) */}
           {/* ===================================== */}
@@ -392,15 +373,15 @@ export default function TheCrunchOfIndiaHero() {
                   setCurrentIndex((currentIndex - 2 + FLAVORS.length * 2) % FLAVORS.length);
                   setTimeout(() => setIsAnimating(false), 800);
                 }}
-                className="hidden lg:flex absolute left-4 xl:left-8 top-10 flex-col items-center opacity-65 hover:opacity-100 transition-all duration-500 scale-75 cursor-pointer -rotate-6 z-10 group"
+                className="hidden lg:flex absolute left-4 xl:left-8 top-1/2 -translate-y-1/2 flex-col items-center opacity-65 hover:opacity-100 transition-all duration-500 scale-75 cursor-pointer -rotate-6 z-10 group"
               >
-                <div className="relative w-[180px] h-[220px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
+                <div className="relative w-[150px] sm:w-[170px] h-[180px] sm:h-[210px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <div className="relative -mt-16 -mr-14 w-[110px] h-[110px] drop-shadow-lg transition-transform duration-500 group-hover:rotate-12">
+                <div className="relative -mt-14 -mr-12 w-[90px] sm:w-[100px] h-[90px] sm:h-[100px] drop-shadow-lg transition-transform duration-500 group-hover:rotate-12">
                   <Image src={item.discImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <span className="text-xs font-bold text-[#6E4F3A] mt-2 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#6E4F3A] mt-1 uppercase tracking-wider">
                   {item.name}
                 </span>
               </div>
@@ -415,15 +396,15 @@ export default function TheCrunchOfIndiaHero() {
             return (
               <div
                 onClick={goToPrev}
-                className="hidden md:flex absolute left-[13%] lg:left-[18%] top-8 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-85 sm:scale-90 cursor-pointer -rotate-3 z-15 group"
+                className="hidden md:flex absolute left-[12%] lg:left-[17%] top-1/2 -translate-y-1/2 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-85 cursor-pointer -rotate-3 z-15 group"
               >
-                <div className="relative w-[210px] h-[260px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
+                <div className="relative w-[175px] sm:w-[195px] h-[210px] sm:h-[240px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <div className="relative -mt-20 -mr-16 w-[130px] h-[130px] drop-shadow-xl transition-transform duration-500 group-hover:rotate-12">
+                <div className="relative -mt-16 -mr-14 w-[105px] sm:w-[115px] h-[105px] sm:h-[115px] drop-shadow-xl transition-transform duration-500 group-hover:rotate-12">
                   <Image src={item.discImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <span className="text-xs font-bold text-[#6E4F3A] mt-2 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#6E4F3A] mt-1 uppercase tracking-wider">
                   {item.name}
                 </span>
               </div>
@@ -436,7 +417,7 @@ export default function TheCrunchOfIndiaHero() {
           <div className="relative z-25 flex flex-col items-center justify-center">
             <div className="relative flex items-center justify-center">
               {/* 1. Center Active Wrapper Packet */}
-              <div className="relative w-[250px] sm:w-[320px] md:w-[350px] h-[310px] sm:h-[390px] z-25">
+              <div className="relative w-[220px] sm:w-[270px] md:w-[295px] h-[260px] sm:h-[310px] md:h-[340px] z-25">
                 <AnimatePresence custom={direction} mode="wait">
                   <motion.div
                     key={`packet-${activeFlavor.id}`}
@@ -445,14 +426,14 @@ export default function TheCrunchOfIndiaHero() {
                     initial="enter"
                     animate="center"
                     exit="exit"
-                    className="w-full h-full relative filter drop-shadow-[0_28px_38px_rgba(0,0,0,0.38)]"
+                    className="w-full h-full relative filter drop-shadow-[0_24px_34px_rgba(0,0,0,0.36)]"
                   >
                     <Image
                       src={activeFlavor.packetImg}
                       alt={activeFlavor.name}
                       fill
                       priority
-                      sizes="(max-width: 768px) 250px, 350px"
+                      sizes="(max-width: 768px) 220px, 300px"
                       className="object-contain"
                     />
                   </motion.div>
@@ -460,7 +441,7 @@ export default function TheCrunchOfIndiaHero() {
               </div>
 
               {/* 2. Right Khakhra Disc - Foreground / Upper Layer in Front of Wrapper (User Spec) */}
-              <div className="absolute -right-10 sm:-right-18 md:-right-20 -bottom-2 sm:-bottom-4 w-[155px] sm:w-[210px] md:w-[230px] h-[155px] sm:h-[210px] md:h-[230px] z-35 pointer-events-none">
+              <div className="absolute -right-8 sm:-right-16 md:-right-18 -bottom-1 sm:-bottom-3 w-[140px] sm:w-[185px] md:w-[205px] h-[140px] sm:h-[185px] md:h-[205px] z-35 pointer-events-none">
                 <AnimatePresence custom={direction} mode="wait">
                   <motion.div
                     key={`disc-right-${activeFlavor.id}`}
@@ -469,13 +450,13 @@ export default function TheCrunchOfIndiaHero() {
                     initial="enter"
                     animate="center"
                     exit="exit"
-                    className="w-full h-full relative filter drop-shadow-[0_24px_34px_rgba(0,0,0,0.44)]"
+                    className="w-full h-full relative filter drop-shadow-[0_22px_32px_rgba(0,0,0,0.44)]"
                   >
                     <Image
                       src={activeFlavor.discImg}
                       alt={`${activeFlavor.name} crisp round`}
                       fill
-                      sizes="(max-width: 768px) 155px, 230px"
+                      sizes="(max-width: 768px) 140px, 205px"
                       className="object-contain"
                     />
                   </motion.div>
@@ -492,15 +473,15 @@ export default function TheCrunchOfIndiaHero() {
             return (
               <div
                 onClick={goToNext}
-                className="hidden md:flex absolute right-[13%] lg:right-[18%] top-8 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-85 sm:scale-90 cursor-pointer rotate-3 z-15 group"
+                className="hidden md:flex absolute right-[12%] lg:right-[17%] top-1/2 -translate-y-1/2 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-85 cursor-pointer rotate-3 z-15 group"
               >
-                <div className="relative w-[210px] h-[260px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
+                <div className="relative w-[175px] sm:w-[195px] h-[210px] sm:h-[240px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <div className="relative -mt-20 -ml-16 w-[130px] h-[130px] drop-shadow-xl transition-transform duration-500 group-hover:-rotate-12">
+                <div className="relative -mt-16 -ml-14 w-[105px] sm:w-[115px] h-[105px] sm:h-[115px] drop-shadow-xl transition-transform duration-500 group-hover:-rotate-12">
                   <Image src={item.discImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <span className="text-xs font-bold text-[#6E4F3A] mt-2 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#6E4F3A] mt-1 uppercase tracking-wider">
                   {item.name}
                 </span>
               </div>
@@ -521,15 +502,15 @@ export default function TheCrunchOfIndiaHero() {
                   setCurrentIndex((currentIndex + 2) % FLAVORS.length);
                   setTimeout(() => setIsAnimating(false), 800);
                 }}
-                className="hidden lg:flex absolute right-4 xl:right-8 top-10 flex-col items-center opacity-65 hover:opacity-100 transition-all duration-500 scale-75 cursor-pointer rotate-6 z-10 group"
+                className="hidden lg:flex absolute right-4 xl:right-8 top-1/2 -translate-y-1/2 flex-col items-center opacity-65 hover:opacity-100 transition-all duration-500 scale-75 cursor-pointer rotate-6 z-10 group"
               >
-                <div className="relative w-[180px] h-[220px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
+                <div className="relative w-[150px] sm:w-[170px] h-[180px] sm:h-[210px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
                   <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <div className="relative -mt-16 -ml-14 w-[110px] h-[110px] drop-shadow-lg transition-transform duration-500 group-hover:-rotate-12">
+                <div className="relative -mt-14 -ml-12 w-[90px] sm:w-[100px] h-[90px] sm:h-[100px] drop-shadow-lg transition-transform duration-500 group-hover:-rotate-12">
                   <Image src={item.discImg} alt={item.name} fill className="object-contain" />
                 </div>
-                <span className="text-xs font-bold text-[#6E4F3A] mt-2 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#6E4F3A] mt-1 uppercase tracking-wider">
                   {item.name}
                 </span>
               </div>
@@ -539,7 +520,7 @@ export default function TheCrunchOfIndiaHero() {
       </div>
 
       {/* Progress Dots Directly Under Product Stage */}
-      <div className="relative z-20 flex items-center justify-center gap-2 -mt-2 mb-3">
+      <div className="relative z-20 flex items-center justify-center gap-1.5 py-1 shrink-0">
         {FLAVORS.map((_, idx) => (
           <button
             key={idx}
@@ -552,8 +533,8 @@ export default function TheCrunchOfIndiaHero() {
             }}
             className={`transition-all duration-300 rounded-full ${
               idx === currentIndex
-                ? "w-7 h-2.5 bg-[#D97706] shadow-sm"
-                : "w-2.5 h-2.5 bg-[#2B1810]/30 hover:bg-[#2B1810]/60"
+                ? "w-6 h-2 bg-[#D97706] shadow-sm"
+                : "w-2 h-2 bg-[#2B1810]/30 hover:bg-[#2B1810]/60"
             }`}
             aria-label={`Jump to flavor ${idx + 1}`}
           />
@@ -563,66 +544,66 @@ export default function TheCrunchOfIndiaHero() {
       {/* ========================================================= */}
       {/* 6. BOTTOM FLOATING CARDS (EXACTLY AS IN MOCKUP) */}
       {/* ========================================================= */}
-      <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-8 w-full pb-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-8 w-full pb-2 sm:pb-3 shrink-0">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-6">
           {/* Left: Torn-Paper Style Certification Card */}
-          <div className="bg-white/95 backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-lg border border-[#2B1810]/10 flex items-center gap-6 sm:gap-8">
+          <div className="bg-white/95 backdrop-blur-md px-4 sm:px-6 py-2 rounded-2xl shadow-md border border-[#2B1810]/10 flex items-center gap-4 sm:gap-7">
             <div className="flex flex-col items-center text-center">
-              <Leaf className="w-5 h-5 text-[#2B1810] mb-1" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
+              <Leaf className="w-4 h-4 text-[#2B1810] mb-0.5" />
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
                 NO ADDED <br /> PRESERVATIVES
               </span>
             </div>
 
-            <div className="w-px h-8 bg-[#2B1810]/15" />
+            <div className="w-px h-6 bg-[#2B1810]/15" />
 
             <div className="flex flex-col items-center text-center">
-              <Wheat className="w-5 h-5 text-[#2B1810] mb-1" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
+              <Wheat className="w-4 h-4 text-[#2B1810] mb-0.5" />
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
                 MADE WITH <br /> NATURAL INGREDIENTS
               </span>
             </div>
 
-            <div className="w-px h-8 bg-[#2B1810]/15" />
+            <div className="w-px h-6 bg-[#2B1810]/15" />
 
             <div className="flex flex-col items-center text-center">
-              <Flame className="w-5 h-5 text-[#2B1810] mb-1" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
+              <Flame className="w-4 h-4 text-[#2B1810] mb-0.5" />
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
                 BAKED <br /> NOT FRIED
               </span>
             </div>
 
-            <div className="w-px h-8 bg-[#2B1810]/15" />
+            <div className="w-px h-6 bg-[#2B1810]/15" />
 
             <div className="flex flex-col items-center text-center">
-              <Ban className="w-5 h-5 text-[#2B1810] mb-1" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
+              <Ban className="w-4 h-4 text-[#2B1810] mb-0.5" />
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
                 NO ARTIFICIAL <br /> COLORS & FLAVOURS
               </span>
             </div>
           </div>
 
           {/* Center: Scroll to Explore Indicator */}
-          <div className="flex flex-col items-center text-center cursor-pointer group">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#6E4F3A] group-hover:text-[#2B1810] transition-colors">
+          <div className="hidden lg:flex flex-col items-center text-center cursor-pointer group">
+            <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#6E4F3A] group-hover:text-[#2B1810] transition-colors">
               SCROLL TO EXPLORE
             </span>
-            <ChevronDown className="w-4 h-4 text-[#6E4F3A] group-hover:translate-y-1 transition-transform animate-bounce mt-1" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#6E4F3A] group-hover:translate-y-0.5 transition-transform animate-bounce mt-0.5" />
           </div>
 
           {/* Right: "5 Delicious Flavours" Cursive Note + 5 Circular Disc Chips */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div className="flex flex-col text-right">
-              <span className="font-[family-name:var(--font-caveat)] text-xl sm:text-2xl font-bold text-[#2B1810] leading-none">
+              <span className="font-[family-name:var(--font-caveat)] text-lg sm:text-xl font-bold text-[#2B1810] leading-none">
                 5 Delicious
               </span>
-              <span className="font-[family-name:var(--font-caveat)] text-xl sm:text-2xl font-bold text-[#C87A1E] leading-none flex items-center justify-end gap-1">
+              <span className="font-[family-name:var(--font-caveat)] text-lg sm:text-xl font-bold text-[#C87A1E] leading-none flex items-center justify-end gap-1">
                 Flavours ➔
               </span>
             </div>
 
             {/* 5 Circular Disc Chips with Hover Scale */}
-            <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-white/80 backdrop-blur-md border border-[#2B1810]/10 shadow-md">
+            <div className="flex items-center gap-1 p-1 rounded-full bg-white/80 backdrop-blur-md border border-[#2B1810]/10 shadow-sm">
               {FLAVORS.map((f, idx) => {
                 const isActive = idx === currentIndex;
                 return (
@@ -636,9 +617,9 @@ export default function TheCrunchOfIndiaHero() {
                       setTimeout(() => setIsAnimating(false), 800);
                     }}
                     title={f.name}
-                    className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden transition-all duration-300 ${
+                    className={`relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden transition-all duration-300 ${
                       isActive
-                        ? "ring-2 ring-[#C87A1E] ring-offset-2 scale-110 shadow-md"
+                        ? "ring-2 ring-[#C87A1E] ring-offset-1 scale-110 shadow-sm"
                         : "opacity-75 hover:opacity-100 hover:scale-105"
                     }`}
                   >

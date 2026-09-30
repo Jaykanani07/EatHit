@@ -37,9 +37,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable}`}
+      className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable} h-full overflow-hidden`}
     >
-      <body className="min-h-screen bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white overflow-x-hidden">
+      <body className="h-full max-h-screen bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white overflow-hidden">
         {children}
       </body>
     </html>
