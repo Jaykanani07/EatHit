@@ -3,18 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Leaf,
-  Wheat,
-  Flame,
-  Ban,
-  ChevronDown,
-  Search,
-  MapPin,
-} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FlavorItem {
   id: string;
@@ -110,7 +99,7 @@ export default function TheCrunchOfIndiaHero() {
     setIsAnimating(true);
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % FLAVORS.length);
-    setTimeout(() => setIsAnimating(false), 700);
+    setTimeout(() => setIsAnimating(false), 550);
   }, [isAnimating]);
 
   const goToPrev = useCallback(() => {
@@ -118,14 +107,14 @@ export default function TheCrunchOfIndiaHero() {
     setIsAnimating(true);
     setDirection(-1);
     setCurrentIndex((prev) => (prev === 0 ? FLAVORS.length - 1 : prev - 1));
-    setTimeout(() => setIsAnimating(false), 700);
+    setTimeout(() => setIsAnimating(false), 550);
   }, [isAnimating]);
 
-  // Desktop wheel scroll advances carousel
+  // Desktop wheel scroll advances carousel smoothly
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (wheelLockRef.current) return;
-      if (Math.abs(e.deltaY) > 35) {
+      if (Math.abs(e.deltaY) > 25) {
         wheelLockRef.current = true;
         if (e.deltaY > 0) {
           goToNext();
@@ -134,7 +123,7 @@ export default function TheCrunchOfIndiaHero() {
         }
         setTimeout(() => {
           wheelLockRef.current = false;
-        }, 650);
+        }, 550);
       }
     };
 
@@ -149,71 +138,10 @@ export default function TheCrunchOfIndiaHero() {
     return FLAVORS[idx];
   };
 
-  // Rolling Khakhra Disc Animation Variants
-  const rollingDiscVariants: Variants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 180 : -180,
-      rotate: dir > 0 ? 240 : -240,
-      scale: 0.88,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      rotate: 0,
-      scale: 1,
-      opacity: 1,
-      transition: {
-        x: { duration: 0.75, ease: EASING },
-        rotate: { duration: 0.8, ease: EASING },
-        scale: { duration: 0.7, ease: EASING },
-        opacity: { duration: 0.4 },
-      },
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -180 : 180,
-      rotate: dir > 0 ? -240 : 240,
-      scale: 0.88,
-      opacity: 0,
-      transition: {
-        x: { duration: 0.7, ease: EASING },
-        rotate: { duration: 0.75, ease: EASING },
-        scale: { duration: 0.7, ease: EASING },
-        opacity: { duration: 0.35 },
-      },
-    }),
-  };
 
-  // Packet Animation: Smooth Bottom-to-Top Fade-In (User spec)
-  const packetVariants: Variants = {
-    enter: {
-      y: 55,
-      scale: 0.94,
-      opacity: 0,
-    },
-    center: {
-      y: 0,
-      scale: 1,
-      opacity: 1,
-      transition: {
-        y: { duration: 0.65, ease: EASING },
-        scale: { duration: 0.65, ease: EASING },
-        opacity: { duration: 0.5 },
-      },
-    },
-    exit: {
-      y: -30,
-      scale: 0.94,
-      opacity: 0,
-      transition: {
-        y: { duration: 0.45, ease: EASING },
-        scale: { duration: 0.45, ease: EASING },
-        opacity: { duration: 0.35 },
-      },
-    },
-  };
 
   return (
-    <section className="relative w-full h-full max-h-screen flex flex-col justify-between overflow-hidden text-[#2B1810] select-none py-1.5 sm:py-2 px-3 sm:px-6">
+    <section className="relative w-full h-full max-h-screen flex flex-col justify-between overflow-hidden text-[#2B1810] select-none pt-1.5 sm:pt-2 pb-4 sm:pb-6 px-3 sm:px-6">
       {/* ========================================================= */}
       {/* 1. MASTER WARM DESERT DUNE & NATURAL STONE PODIUM STAGE   */}
       {/* ========================================================= */}
@@ -242,68 +170,7 @@ export default function TheCrunchOfIndiaHero() {
         <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#F2E5D4]/70 via-[#F2E5D4]/25 to-transparent pointer-events-none" />
       </div>
 
-      {/* ========================================================= */}
-      {/* 2. FLOATING SPICE & INGREDIENT PARTICLES (MATCHING MOCKUP) */}
-      {/* ========================================================= */}
-      <div className="absolute inset-0 pointer-events-none z-15 overflow-hidden">
-        {/* Floating Red Chili (Top-Left near Masala) */}
-        <motion.div
-          animate={{
-            y: [-4, 6, -4],
-            rotate: [-14, -8, -14],
-          }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-[6%] sm:left-[8%] top-[24%] sm:top-[26%] text-3xl sm:text-4xl filter drop-shadow-[0_8px_14px_rgba(220,38,38,0.4)]"
-        >
-          🌶️
-        </motion.div>
 
-        {/* Floating Red Chili Flakes */}
-        <div className="absolute left-[9%] top-[34%] w-2 h-2 rounded-full bg-[#DC2626] opacity-75 blur-[0.4px]" />
-        <div className="absolute left-[13%] top-[29%] w-1.5 h-1.5 rounded-full bg-[#B91C1C] opacity-80" />
-
-        {/* Floating Green Methi Leaves (Mid-Left near Methi) */}
-        <motion.div
-          animate={{
-            y: [5, -5, 5],
-            rotate: [12, 18, 12],
-          }}
-          transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-[24%] sm:left-[26%] top-[22%] sm:top-[25%] text-2xl sm:text-3xl filter drop-shadow-[0_8px_12px_rgba(22,163,74,0.35)]"
-        >
-          🌿
-        </motion.div>
-        <div className="absolute left-[28%] top-[33%] text-base opacity-70">🌱</div>
-
-        {/* Floating Golden Wheat Stalk (Center-Right near Podium) */}
-        <motion.div
-          animate={{
-            y: [-3, 4, -3],
-            rotate: [28, 34, 28],
-          }}
-          transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[33%] sm:right-[35%] top-[24%] sm:top-[27%] text-2xl sm:text-3xl filter drop-shadow-[0_8px_12px_rgba(217,119,6,0.35)]"
-        >
-          🌾
-        </motion.div>
-
-        {/* Floating Cumin Grains & Spices (Mid-Right near Jeera) */}
-        <div className="absolute right-[22%] top-[28%] w-1.5 h-2.5 rounded-full bg-[#78350F] rotate-45 opacity-75" />
-        <div className="absolute right-[26%] top-[34%] w-1 h-2 rounded-full bg-[#92400E] rotate-12 opacity-80" />
-        <div className="absolute right-[20%] top-[36%] w-1.5 h-1.5 rounded-full bg-[#D97706] opacity-75" />
-
-        {/* Floating Garlic Clove (Top-Right near Lasun) */}
-        <motion.div
-          animate={{
-            y: [-5, 5, -5],
-            rotate: [15, 8, 15],
-          }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[7%] sm:right-[9%] top-[25%] sm:top-[27%] text-2xl sm:text-3xl filter drop-shadow-[0_8px_12px_rgba(0,0,0,0.2)]"
-        >
-          🧄
-        </motion.div>
-      </div>
 
       {/* ========================================================= */}
       {/* 3. TOP NAVIGATION BAR (FAITHFUL TO MASTER DESIGN)         */}
@@ -336,43 +203,20 @@ export default function TheCrunchOfIndiaHero() {
           <Link href="#products" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
             Products
           </Link>
-          <Link href="#our-story" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
-            Our Story
-          </Link>
-          <Link href="#find-a-store" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
-            Find a Store
-          </Link>
           <Link href="#contact" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
             Contact
           </Link>
         </nav>
 
-        {/* Right: Search Circle Button + "Find a Store" Pill Button */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 hover:bg-white text-[#2B1810] shadow-sm border border-[#2B1810]/10 flex items-center justify-center transition-transform hover:scale-105"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4 text-[#2B1810]" />
-          </button>
-          <Link
-            href="#find-a-store"
-            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#23120B] text-white text-xs font-semibold shadow-sm hover:bg-[#3D2214] transition-colors"
-          >
-            <MapPin className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>Find a Store</span>
-          </Link>
-        </div>
+        {/* Right Spacer for Symmetrical Nav Centering */}
+        <div className="w-12 h-12 sm:w-13 sm:h-13 pointer-events-none hidden md:block" aria-hidden="true" />
       </header>
 
       {/* ========================================================= */}
       {/* 4. HERO HEADLINE (MATCHING MASTER TYPOGRAPHY)             */}
       {/* ========================================================= */}
       <div className="relative z-20 text-center max-w-4xl mx-auto px-4 pt-0 sm:pt-1 shrink-0">
-        {/* Subtitle */}
-        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#4A2E1F] mb-0.5">
-          TRADITIONAL &nbsp;•&nbsp; CRISPY &nbsp;•&nbsp; EVERYDAY GOODNESS
-        </p>
+
 
         {/* Main Title */}
         <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-black uppercase tracking-tight font-[family-name:var(--font-outfit)] leading-[0.84] text-[#24120A]">
@@ -404,28 +248,10 @@ export default function TheCrunchOfIndiaHero() {
       {/* 5. 5-PRODUCT STAGE WITH STONE PODIUM & ROLLING ANIMATIONS */}
       {/* ========================================================= */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-2 sm:px-4 flex-1 min-h-0 flex items-center justify-center my-0">
-        {/* Left Arrow Button */}
-        <button
-          onClick={goToPrev}
-          disabled={isAnimating}
-          className="absolute left-1 sm:left-4 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-[#2B1810] shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/80"
-          aria-label="Previous Flavor"
-        >
-          <ChevronLeft className="w-5 h-5 text-[#2B1810]" />
-        </button>
 
-        {/* Right Arrow Button */}
-        <button
-          onClick={goToNext}
-          disabled={isAnimating}
-          className="absolute right-1 sm:right-4 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-[#2B1810] shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/80"
-          aria-label="Next Flavor"
-        >
-          <ChevronRight className="w-5 h-5 text-[#2B1810]" />
-        </button>
 
         {/* Panoramic Showcase Container */}
-        <div className="relative w-full h-full max-h-[350px] sm:max-h-[390px] flex items-center justify-center">
+        <div className="relative w-full h-[320px] sm:h-[370px] md:h-[400px] flex items-end justify-center pb-2 sm:pb-3 overflow-visible">
           {/* ===================================== */}
           {/* FAR LEFT PRODUCT (Offset -2) */}
           {/* ===================================== */}
@@ -438,19 +264,37 @@ export default function TheCrunchOfIndiaHero() {
                   setIsAnimating(true);
                   setDirection(-1);
                   setCurrentIndex((currentIndex - 2 + FLAVORS.length * 2) % FLAVORS.length);
-                  setTimeout(() => setIsAnimating(false), 700);
+                  setTimeout(() => setIsAnimating(false), 550);
                 }}
-                className="hidden lg:flex absolute left-4 xl:left-8 top-1/2 -translate-y-1/2 flex-col items-center opacity-70 hover:opacity-100 transition-all duration-500 scale-[0.74] cursor-pointer -rotate-6 z-10 group"
+                className="hidden lg:flex absolute left-[calc(50%-450px)] xl:left-[calc(50%-510px)] -translate-x-1/2 bottom-5 sm:bottom-7 flex-col items-center opacity-70 hover:opacity-100 transition-opacity duration-300 scale-[0.72] cursor-pointer -rotate-6 z-10 group"
               >
-                <div className="relative w-[150px] sm:w-[170px] h-[180px] sm:h-[210px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
-                  <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <div className="relative -mt-14 -mr-12 w-[90px] sm:w-[100px] h-[90px] sm:h-[100px] drop-shadow-lg transition-transform duration-500 group-hover:rotate-12">
-                  <Image src={item.discImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <span className="text-[11px] font-bold text-[#5C3B24] mt-1 uppercase tracking-wider">
-                  {item.name}
-                </span>
+                <AnimatePresence custom={direction} mode="popLayout">
+                  <motion.div
+                    key={`side-far-left-${item.id}`}
+                    initial={{
+                      x: direction > 0 ? 30 : -30,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      x: 0,
+                      opacity: 1,
+                      transition: { duration: 0.5, ease: EASING },
+                    }}
+                    exit={{
+                      x: direction > 0 ? -30 : 30,
+                      opacity: 0,
+                      transition: { duration: 0.35, ease: EASING },
+                    }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="relative w-[150px] sm:w-[170px] h-[180px] sm:h-[210px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
+                      <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                    <div className="relative -mt-14 -mr-10 w-[90px] sm:w-[100px] h-[90px] sm:h-[100px] drop-shadow-lg transition-transform duration-500 group-hover:rotate-12">
+                      <Image src={item.discImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             );
           })()}
@@ -463,17 +307,35 @@ export default function TheCrunchOfIndiaHero() {
             return (
               <div
                 onClick={goToPrev}
-                className="hidden md:flex absolute left-[12%] lg:left-[17%] top-1/2 -translate-y-1/2 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-[0.85] cursor-pointer -rotate-3 z-15 group"
+                className="hidden md:flex absolute left-[calc(50%-245px)] lg:left-[calc(50%-275px)] xl:left-[calc(50%-310px)] -translate-x-1/2 bottom-2 sm:bottom-4 flex-col items-center opacity-85 hover:opacity-100 transition-opacity duration-300 scale-[0.84] cursor-pointer -rotate-3 z-15 group"
               >
-                <div className="relative w-[170px] sm:w-[190px] h-[205px] sm:h-[235px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
-                  <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <div className="relative -mt-16 -mr-14 w-[105px] sm:w-[115px] h-[105px] sm:h-[115px] drop-shadow-xl transition-transform duration-500 group-hover:rotate-12">
-                  <Image src={item.discImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <span className="text-[11px] font-bold text-[#5C3B24] mt-1 uppercase tracking-wider">
-                  {item.name}
-                </span>
+                <AnimatePresence custom={direction} mode="popLayout">
+                  <motion.div
+                    key={`side-inner-left-${item.id}`}
+                    initial={{
+                      x: direction > 0 ? 30 : -30,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      x: 0,
+                      opacity: 1,
+                      transition: { duration: 0.5, ease: EASING },
+                    }}
+                    exit={{
+                      x: direction > 0 ? -30 : 30,
+                      opacity: 0,
+                      transition: { duration: 0.35, ease: EASING },
+                    }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="relative w-[170px] sm:w-[190px] h-[205px] sm:h-[235px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
+                      <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                    <div className="relative -mt-16 -mr-12 w-[105px] sm:w-[115px] h-[105px] sm:h-[115px] drop-shadow-xl transition-transform duration-500 group-hover:rotate-12">
+                      <Image src={item.discImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             );
           })()}
@@ -481,59 +343,81 @@ export default function TheCrunchOfIndiaHero() {
           {/* ===================================== */}
           {/* ACTIVE CENTER HERO PRODUCT ON PODIUM */}
           {/* ===================================== */}
-          <div className="relative z-25 flex flex-col items-center justify-center">
-            <div className="relative flex items-center justify-center">
-              {/* Left Khakhra Round (Partially behind left edge) */}
-              <div className="absolute -left-20 sm:-left-32 md:-left-40 top-1/2 -translate-y-1/2 w-[160px] sm:w-[200px] md:w-[230px] h-[160px] sm:h-[200px] md:h-[230px] z-10 pointer-events-none -rotate-6">
-                <Image
-                  src={activeFlavor.discImg}
-                  alt={`${activeFlavor.name} left round`}
-                  fill
-                  sizes="(max-width: 768px) 160px, 230px"
-                  className="object-contain filter drop-shadow-[0_16px_24px_rgba(0,0,0,0.32)] opacity-95"
-                />
-              </div>
-
-              {/* Center Active Wrapper Packet (Hero on Stone Podium) */}
-              <div className="relative w-[240px] sm:w-[290px] md:w-[325px] h-[280px] sm:h-[340px] md:h-[385px] z-25">
-                <div
-                  key={`packet-${activeFlavor.id}`}
-                  className="w-full h-full relative filter drop-shadow-[0_24px_36px_rgba(0,0,0,0.42)]"
-                >
+          <div className="relative z-25 flex flex-col items-center justify-end">
+            <AnimatePresence custom={direction} mode="popLayout">
+              <motion.div
+                key={`center-hero-${activeFlavor.id}`}
+                initial={{
+                  x: direction > 0 ? 110 : -110,
+                  opacity: 0,
+                  scale: 0.92,
+                }}
+                animate={{
+                  x: -24, // Symmetrical counter-balance for the single right khakhra disc
+                  opacity: 1,
+                  scale: 1,
+                  transition: {
+                    x: { duration: 0.55, ease: EASING },
+                    scale: { duration: 0.55, ease: EASING },
+                    opacity: { duration: 0.4 },
+                  },
+                }}
+                exit={{
+                  x: direction > 0 ? -110 : 110,
+                  opacity: 0,
+                  scale: 0.92,
+                  transition: {
+                    x: { duration: 0.45, ease: EASING },
+                    scale: { duration: 0.45, ease: EASING },
+                    opacity: { duration: 0.3 },
+                  },
+                }}
+                className="relative flex items-end justify-center"
+              >
+                {/* Center Hero Packet */}
+                <div className="relative w-[220px] sm:w-[270px] md:w-[310px] h-[260px] sm:h-[320px] md:h-[370px] z-25 filter drop-shadow-[0_24px_36px_rgba(0,0,0,0.42)]">
                   <Image
                     src={activeFlavor.packetImg}
                     alt={activeFlavor.name}
                     fill
                     priority
-                    sizes="(max-width: 768px) 240px, 325px"
+                    sizes="(max-width: 768px) 220px, 310px"
                     className="object-contain"
                   />
                 </div>
-              </div>
 
-              {/* Right Khakhra Round - Upper Layer Leaning Forward on Right (Rolling animation) */}
-              <div className="absolute -right-16 sm:-right-28 md:-right-34 -bottom-3 sm:-bottom-6 w-[165px] sm:w-[205px] md:w-[235px] h-[165px] sm:h-[205px] md:h-[235px] z-35 pointer-events-none">
-                <AnimatePresence custom={direction} mode="wait" initial={false}>
-                  <motion.div
-                    key={`disc-right-${activeFlavor.id}`}
-                    custom={direction}
-                    variants={rollingDiscVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    className="w-full h-full relative filter drop-shadow-[0_22px_32px_rgba(0,0,0,0.44)]"
-                  >
-                    <Image
-                      src={activeFlavor.discImg}
-                      alt={`${activeFlavor.name} crisp round`}
-                      fill
-                      sizes="(max-width: 768px) 165px, 235px"
-                      className="object-contain"
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
+                {/* Right Khakhra Round - Rolls smoothly alongside the packet */}
+                <motion.div
+                  initial={{
+                    x: direction > 0 ? 80 : -80,
+                    rotate: direction > 0 ? 160 : -160,
+                    opacity: 0,
+                    scale: 0.85,
+                  }}
+                  animate={{
+                    x: 0,
+                    rotate: 0,
+                    opacity: 1,
+                    scale: 1,
+                    transition: {
+                      x: { duration: 0.58, ease: EASING },
+                      rotate: { duration: 0.65, ease: EASING },
+                      opacity: { duration: 0.4 },
+                      scale: { duration: 0.58, ease: EASING },
+                    },
+                  }}
+                  className="absolute -right-8 sm:-right-12 md:-right-16 -bottom-1 sm:-bottom-2 w-[150px] sm:w-[190px] md:w-[220px] h-[150px] sm:h-[190px] md:h-[220px] z-35 pointer-events-none filter drop-shadow-[0_22px_32px_rgba(0,0,0,0.44)]"
+                >
+                  <Image
+                    src={activeFlavor.discImg}
+                    alt={`${activeFlavor.name} crisp round`}
+                    fill
+                    sizes="(max-width: 768px) 150px, 220px"
+                    className="object-contain"
+                  />
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* ===================================== */}
@@ -544,17 +428,35 @@ export default function TheCrunchOfIndiaHero() {
             return (
               <div
                 onClick={goToNext}
-                className="hidden md:flex absolute right-[12%] lg:right-[17%] top-1/2 -translate-y-1/2 flex-col items-center opacity-85 hover:opacity-100 transition-all duration-500 scale-[0.85] cursor-pointer rotate-3 z-15 group"
+                className="hidden md:flex absolute left-[calc(50%+245px)] lg:left-[calc(50%+275px)] xl:left-[calc(50%+310px)] -translate-x-1/2 bottom-2 sm:bottom-4 flex-col items-center opacity-85 hover:opacity-100 transition-opacity duration-300 scale-[0.84] cursor-pointer rotate-3 z-15 group"
               >
-                <div className="relative w-[170px] sm:w-[190px] h-[205px] sm:h-[235px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
-                  <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <div className="relative -mt-16 -ml-14 w-[105px] sm:w-[115px] h-[105px] sm:h-[115px] drop-shadow-xl transition-transform duration-500 group-hover:-rotate-12">
-                  <Image src={item.discImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <span className="text-[11px] font-bold text-[#5C3B24] mt-1 uppercase tracking-wider">
-                  {item.name}
-                </span>
+                <AnimatePresence custom={direction} mode="popLayout">
+                  <motion.div
+                    key={`side-inner-right-${item.id}`}
+                    initial={{
+                      x: direction > 0 ? 30 : -30,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      x: 0,
+                      opacity: 1,
+                      transition: { duration: 0.5, ease: EASING },
+                    }}
+                    exit={{
+                      x: direction > 0 ? -30 : 30,
+                      opacity: 0,
+                      transition: { duration: 0.35, ease: EASING },
+                    }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="relative w-[170px] sm:w-[190px] h-[205px] sm:h-[235px] drop-shadow-2xl transition-transform duration-500 group-hover:scale-105">
+                      <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                    <div className="relative -mt-16 -mr-12 w-[105px] sm:w-[115px] h-[105px] sm:h-[115px] drop-shadow-xl transition-transform duration-500 group-hover:rotate-12">
+                      <Image src={item.discImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             );
           })()}
@@ -571,146 +473,43 @@ export default function TheCrunchOfIndiaHero() {
                   setIsAnimating(true);
                   setDirection(1);
                   setCurrentIndex((currentIndex + 2) % FLAVORS.length);
-                  setTimeout(() => setIsAnimating(false), 700);
+                  setTimeout(() => setIsAnimating(false), 550);
                 }}
-                className="hidden lg:flex absolute right-4 xl:right-8 top-1/2 -translate-y-1/2 flex-col items-center opacity-70 hover:opacity-100 transition-all duration-500 scale-[0.74] cursor-pointer rotate-6 z-10 group"
+                className="hidden lg:flex absolute left-[calc(50%+450px)] xl:left-[calc(50%+510px)] -translate-x-1/2 bottom-5 sm:bottom-7 flex-col items-center opacity-70 hover:opacity-100 transition-opacity duration-300 scale-[0.72] cursor-pointer rotate-6 z-10 group"
               >
-                <div className="relative w-[150px] sm:w-[170px] h-[180px] sm:h-[210px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
-                  <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <div className="relative -mt-14 -ml-12 w-[90px] sm:w-[100px] h-[90px] sm:h-[100px] drop-shadow-lg transition-transform duration-500 group-hover:-rotate-12">
-                  <Image src={item.discImg} alt={item.name} fill className="object-contain" />
-                </div>
-                <span className="text-[11px] font-bold text-[#5C3B24] mt-1 uppercase tracking-wider">
-                  {item.name}
-                </span>
+                <AnimatePresence custom={direction} mode="popLayout">
+                  <motion.div
+                    key={`side-far-right-${item.id}`}
+                    initial={{
+                      x: direction > 0 ? 30 : -30,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      x: 0,
+                      opacity: 1,
+                      transition: { duration: 0.5, ease: EASING },
+                    }}
+                    exit={{
+                      x: direction > 0 ? -30 : 30,
+                      opacity: 0,
+                      transition: { duration: 0.35, ease: EASING },
+                    }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="relative w-[150px] sm:w-[170px] h-[180px] sm:h-[210px] drop-shadow-xl transition-transform duration-500 group-hover:scale-105">
+                      <Image src={item.packetImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                    <div className="relative -mt-14 -mr-10 w-[90px] sm:w-[100px] h-[90px] sm:h-[100px] drop-shadow-lg transition-transform duration-500 group-hover:rotate-12">
+                      <Image src={item.discImg} alt={item.name} fill className="object-contain" />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             );
           })()}
         </div>
       </div>
 
-      {/* Progress Dots Directly Under Stone Podium (Matching Mockup) */}
-      <div className="relative z-20 flex items-center justify-center gap-1.5 py-1 shrink-0">
-        {FLAVORS.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              if (isAnimating || idx === currentIndex) return;
-              setIsAnimating(true);
-              setDirection(idx > currentIndex ? 1 : -1);
-              setCurrentIndex(idx);
-              setTimeout(() => setIsAnimating(false), 700);
-            }}
-            className={`transition-all duration-300 rounded-full ${
-              idx === currentIndex
-                ? "w-6 h-2 bg-[#D48B28] shadow-sm"
-                : "w-2 h-2 bg-[#2B1810]/35 hover:bg-[#2B1810]/65"
-            }`}
-            aria-label={`Jump to flavor ${idx + 1}`}
-          />
-        ))}
-      </div>
-
-      {/* ========================================================= */}
-      {/* 6. BOTTOM FLOATING BADGES (TORN-PAPER PARCHMENT CARDS)   */}
-      {/* ========================================================= */}
-      <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 w-full pb-2 shrink-0">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-4">
-          {/* Left: Torn-Paper Style Certification Badge Card */}
-          <div className="bg-[#FAF6EF]/95 backdrop-blur-md px-4 sm:px-6 py-2 rounded-xl shadow-md border border-[#2B1810]/10 flex items-center gap-4 sm:gap-6">
-            <div className="flex flex-col items-center text-center">
-              <Leaf className="w-4 h-4 text-[#2B1810] mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
-                NO ADDED <br /> PRESERVATIVES
-              </span>
-            </div>
-
-            <div className="w-px h-6 bg-[#2B1810]/15" />
-
-            <div className="flex flex-col items-center text-center">
-              <Wheat className="w-4 h-4 text-[#2B1810] mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
-                MADE WITH <br /> NATURAL INGREDIENTS
-              </span>
-            </div>
-
-            <div className="w-px h-6 bg-[#2B1810]/15" />
-
-            <div className="flex flex-col items-center text-center">
-              <Flame className="w-4 h-4 text-[#2B1810] mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
-                BAKED <br /> NOT FRIED
-              </span>
-            </div>
-
-            <div className="w-px h-6 bg-[#2B1810]/15" />
-
-            <div className="flex flex-col items-center text-center">
-              <Ban className="w-4 h-4 text-[#2B1810] mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-[#2B1810] leading-tight">
-                NO ARTIFICIAL <br /> COLORS & FLAVOURS
-              </span>
-            </div>
-          </div>
-
-          {/* Center: Scroll to Explore Indicator */}
-          <div className="hidden lg:flex flex-col items-center text-center cursor-pointer group">
-            <div className="w-px h-4 bg-[#6E4F3A]/40 mb-1" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#5C3B24] group-hover:text-[#2B1810] transition-colors">
-              SCROLL TO EXPLORE
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-[#5C3B24] group-hover:translate-y-0.5 transition-transform animate-bounce mt-0.5" />
-          </div>
-
-          {/* Right: "5 Delicious Flavours" Cursive Note + 5 Circular Disc Chips */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex flex-col text-right">
-              <span className="font-[family-name:var(--font-caveat)] text-xl sm:text-2xl font-bold text-[#2B1810] leading-none">
-                5
-              </span>
-              <span className="font-[family-name:var(--font-caveat)] text-lg sm:text-xl font-bold text-[#2B1810] leading-none">
-                Delicious
-              </span>
-              <span className="font-[family-name:var(--font-caveat)] text-lg sm:text-xl font-bold text-[#D48B28] leading-none flex items-center justify-end gap-1">
-                Flavours ➔
-              </span>
-            </div>
-
-            {/* 5 Circular Disc Chips with Hover Scale */}
-            <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-[#FAF6EF]/90 backdrop-blur-md border border-[#2B1810]/10 shadow-sm">
-              {FLAVORS.map((f, idx) => {
-                const isActive = idx === currentIndex;
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => {
-                      if (isAnimating || idx === currentIndex) return;
-                      setIsAnimating(true);
-                      setDirection(idx > currentIndex ? 1 : -1);
-                      setCurrentIndex(idx);
-                      setTimeout(() => setIsAnimating(false), 700);
-                    }}
-                    title={f.name}
-                    className={`relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden transition-all duration-300 ${
-                      isActive
-                        ? "ring-2 ring-[#D48B28] ring-offset-1 scale-110 shadow-sm"
-                        : "opacity-80 hover:opacity-100 hover:scale-105"
-                    }`}
-                  >
-                    <Image
-                      src={f.discImg}
-                      alt={f.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
