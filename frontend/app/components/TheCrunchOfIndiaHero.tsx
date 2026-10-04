@@ -33,7 +33,7 @@ const FLAVORS: FlavorItem[] = [
     id: "methi",
     name: "Methi Khakhra",
     packetImg: "/images/products/methi-pouch.png",
-    discImg: "/images/products/methi-khakhra.png",
+    discImg: "/images/products/methi khakhra.png",
     color: "#16A34A",
     glowColor: "rgba(22, 163, 74, 0.20)",
     floatingIngredient: "🌿",
