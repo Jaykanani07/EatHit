@@ -146,13 +146,13 @@ function ProductSlot({
   const prevOffset = (((index - prevIndex + 7) % 5) - 2) as -2 | -1 | 0 | 1 | 2;
   const isWrap = Math.abs(offset - prevOffset) > 2;
   const slot = SLOTS[offset];
+  const isSelectable = offset !== 0;
 
   return (
     <motion.div
-      onClick={() => onSelect(offset, index)}
-      className={`absolute -translate-x-1/2 cursor-pointer pointer-events-auto select-none ${slot.responsiveClass} ${slot.shadow} ${
-        offset === 0 ? "cursor-default" : "hover:brightness-105"
-      }`}
+      onClick={() => isSelectable && onSelect(offset, index)}
+      className={`absolute -translate-x-1/2 select-none ${slot.responsiveClass} ${slot.shadow} ${isSelectable ? "cursor-pointer hover:brightness-105 pointer-events-auto" : "cursor-default pointer-events-none"
+        }`}
       initial={false}
       animate={{
         left: slot.left,
@@ -166,18 +166,18 @@ function ProductSlot({
       transition={
         isWrap
           ? {
-              left: { duration: 0 },
-              bottom: { duration: 0 },
-              width: { duration: 0 },
-              zIndex: { duration: 0 },
-              scale: { duration: 0 },
-              rotate: { duration: 0 },
-              opacity: { duration: 0.35, ease: "easeOut" },
-            }
+            left: { duration: 0 },
+            bottom: { duration: 0 },
+            width: { duration: 0 },
+            zIndex: { duration: 0 },
+            scale: { duration: 0 },
+            rotate: { duration: 0 },
+            opacity: { duration: 0.35, ease: "easeOut" },
+          }
           : {
-              duration: 0.6,
-              ease: EASING,
-            }
+            duration: 0.6,
+            ease: EASING,
+          }
       }
       style={{
         aspectRatio: "1145 / 1374",
@@ -264,14 +264,24 @@ function Disc({
   );
 }
 
+// Bounded sequence covering all 5 khakhras starting from Plain (2):
+// Step 0: Plain Khakhra (index 2)
+// Step 1: Jeera Khakhra (index 3)
+// Step 2: Lasun Khakhra (index 4)
+// Step 3: Masala Khakhra (index 0)
+// Step 4: Methi Khakhra (index 1) - Final product, bounded (does not loop)
+const SEQUENCE: number[] = [2, 3, 4, 0, 1];
+
 export default function TheCrunchOfIndiaHero() {
-  // Index 2 is Plain Khakhra (the center hero)
-  const [currentIndex, setCurrentIndex] = useState(2);
-  const [prevIndex, setPrevIndex] = useState(2);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [prevStep, setPrevStep] = useState(0);
   const [direction, setDirection] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const wheelLockRef = useRef(false);
   const touchStartXRef = useRef<number | null>(null);
+
+  const currentIndex = SEQUENCE[currentStep];
+  const prevIndex = SEQUENCE[prevStep];
 
   // Preload all assets on mount
   useEffect(() => {
@@ -285,59 +295,80 @@ export default function TheCrunchOfIndiaHero() {
 
   const goToNext = useCallback(() => {
     if (isAnimating) return;
+    if (currentStep >= SEQUENCE.length - 1) return; // Do not advance past the last khakhra
     setIsAnimating(true);
     setDirection(1);
-    setCurrentIndex((prev) => {
-      setPrevIndex(prev);
-      return (prev + 1) % FLAVORS.length;
-    });
+    setPrevStep(currentStep);
+    setCurrentStep((prev) => Math.min(prev + 1, SEQUENCE.length - 1));
     setTimeout(() => setIsAnimating(false), 550);
-  }, [isAnimating]);
+  }, [currentStep, isAnimating]);
 
   const goToPrev = useCallback(() => {
     if (isAnimating) return;
+    if (currentStep <= 0) return; // Do not move backwards past initial Plain khakhra
     setIsAnimating(true);
     setDirection(-1);
-    setCurrentIndex((prev) => {
-      setPrevIndex(prev);
-      return prev === 0 ? FLAVORS.length - 1 : prev - 1;
-    });
+    setPrevStep(currentStep);
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
     setTimeout(() => setIsAnimating(false), 550);
-  }, [isAnimating]);
+  }, [currentStep, isAnimating]);
 
   const handleSelect = useCallback(
     (offset: number, index: number) => {
       if (offset === 0 || isAnimating) return;
+      const targetStep = SEQUENCE.indexOf(index);
+      if (targetStep === -1 || targetStep === currentStep) return;
       setIsAnimating(true);
-      setDirection(offset > 0 ? 1 : -1);
-      setCurrentIndex((prev) => {
-        setPrevIndex(prev);
-        return index;
-      });
+      setDirection(targetStep > currentStep ? 1 : -1);
+      setPrevStep(currentStep);
+      setCurrentStep(targetStep);
       setTimeout(() => setIsAnimating(false), 550);
     },
-    [isAnimating]
+    [currentStep, isAnimating]
   );
 
-  // Desktop wheel scroll advances carousel smoothly
+  // Desktop wheel scroll advances carousel smoothly within bounds
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (wheelLockRef.current) return;
-      if (Math.abs(e.deltaY) > 25) {
-        wheelLockRef.current = true;
-        if (e.deltaY > 0) {
-          goToNext();
+      const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (Math.abs(delta) > 25) {
+        if (delta > 0) {
+          if (currentStep < SEQUENCE.length - 1) {
+            wheelLockRef.current = true;
+            goToNext();
+            setTimeout(() => {
+              wheelLockRef.current = false;
+            }, 550);
+          }
         } else {
-          goToPrev();
+          if (currentStep > 0) {
+            wheelLockRef.current = true;
+            goToPrev();
+            setTimeout(() => {
+              wheelLockRef.current = false;
+            }, 550);
+          }
         }
-        setTimeout(() => {
-          wheelLockRef.current = false;
-        }, 550);
       }
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
     return () => window.removeEventListener("wheel", handleWheel);
+  }, [goToNext, goToPrev, currentStep]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        goToNext();
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        goToPrev();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNext, goToPrev]);
 
   // Touch swipe support for mobile
