@@ -73,57 +73,57 @@ interface SlotConfig {
 
 const SLOTS: Record<number, SlotConfig> = {
   [-2]: {
-    left: "19.6%",
-    bottom: "26%",
-    width: "12.3%",
+    left: "19.8%",
+    bottom: "25.5%",
+    width: "12.2%",
     zIndex: 20,
     opacity: 0.9,
-    scale: 0.95,
-    rotate: -1,
+    scale: 0.9,
+    rotate: -1.5,
     shadow: "drop-shadow-[0_12px_22px_rgba(0,0,0,0.28)]",
     responsiveClass: "hidden lg:block",
   },
   [-1]: {
-    left: "32.3%",
-    bottom: "25.5%",
-    width: "13.5%",
+    left: "33%",
+    bottom: "25%",
+    width: "14.2%",
     zIndex: 25,
-    opacity: 0.95,
-    scale: 0.98,
+    opacity: 0.96,
+    scale: 0.96,
     rotate: -0.5,
     shadow: "drop-shadow-[0_16px_26px_rgba(0,0,0,0.32)]",
     responsiveClass: "hidden md:block",
   },
   [0]: {
     left: "50%",
-    bottom: "20%",
-    width: "21.5%",
+    bottom: "19.5%",
+    width: "22.5%",
     zIndex: 30,
     opacity: 1,
     scale: 1,
     rotate: 0,
-    shadow: "drop-shadow-[0_24px_36px_rgba(0,0,0,0.42)]",
+    shadow: "drop-shadow-[0_26px_40px_rgba(0,0,0,0.45)]",
     responsiveClass: "block",
   },
   [1]: {
-    left: "68.7%",
-    bottom: "25.5%",
-    width: "13.5%",
+    left: "67%",
+    bottom: "25%",
+    width: "14.2%",
     zIndex: 25,
-    opacity: 0.95,
-    scale: 0.98,
+    opacity: 0.96,
+    scale: 0.96,
     rotate: 0.5,
     shadow: "drop-shadow-[0_16px_26px_rgba(0,0,0,0.32)]",
     responsiveClass: "hidden md:block",
   },
   [2]: {
-    left: "81%",
-    bottom: "24%",
-    width: "11.7%",
+    left: "80.2%",
+    bottom: "25.5%",
+    width: "12.2%",
     zIndex: 20,
     opacity: 0.9,
-    scale: 0.95,
-    rotate: 1,
+    scale: 0.9,
+    rotate: 1.5,
     shadow: "drop-shadow-[0_12px_22px_rgba(0,0,0,0.28)]",
     responsiveClass: "hidden lg:block",
   },
@@ -209,8 +209,8 @@ function Disc({
       className="absolute pointer-events-none select-none -translate-x-1/2"
       style={{
         left: "57%",
-        bottom: "17.5%",
-        width: "13%",
+        bottom: "16.8%",
+        width: "13.8%",
         aspectRatio: "1 / 1",
         zIndex: 32,
       }}
@@ -431,35 +431,11 @@ export default function TheCrunchOfIndiaHero() {
             }}
           />
 
-          {/* Layer 2: Left Side Props (Plant, clay pot, wicker plate, wheat, stone) */}
-          <div className="absolute left-0 bottom-0 h-full aspect-[1498/1050] pointer-events-none select-none z-10">
-            <Image
-              src="/new-images/left-side.webp"
-              alt=""
-              aria-hidden
-              fill
-              sizes="(max-width: 1200px) 50vw, 42vw"
-              className="object-contain object-left-bottom"
-            />
-          </div>
-
-          {/* Layer 3: Right Side Props (Plants, bowls, turmeric, wheat, stone) */}
-          <div className="absolute right-0 bottom-0 h-full aspect-[1498/1050] pointer-events-none select-none z-10">
-            <Image
-              src="/new-images/right-side.webp"
-              alt=""
-              aria-hidden
-              fill
-              sizes="(max-width: 1200px) 50vw, 42vw"
-              className="object-contain object-right-bottom"
-            />
-          </div>
-
           {/* Layer 4: Central Stone Rock Slab Podium */}
           <div
             className="absolute left-1/2 -translate-x-1/2 pointer-events-none select-none z-15"
             style={{
-              width: "60%",
+              width: "70%",
               bottom: "4.5%",
               aspectRatio: "2172 / 724",
             }}
@@ -470,7 +446,7 @@ export default function TheCrunchOfIndiaHero() {
               aria-hidden
               fill
               priority
-              sizes="65vw"
+              sizes="75vw"
               className="object-contain"
             />
           </div>
@@ -478,7 +454,7 @@ export default function TheCrunchOfIndiaHero() {
           {/* Layer 5: Hero Headline (sitting on cream wall) */}
           <div
             className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none select-none z-20 w-full max-w-[90%]"
-            style={{ top: "18%" }}
+            style={{ top: "15%" }}
           >
             <h1
               className="font-black uppercase tracking-tight font-[family-name:var(--font-outfit)] leading-[0.84] text-[#24120A]"
