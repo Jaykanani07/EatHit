@@ -407,7 +407,7 @@ export default function TheCrunchOfIndiaHero() {
           <Link href="/" className="flex items-center gap-2 group" aria-label="EatHit Home">
             <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full overflow-hidden shadow-md border-2 border-[#EAB308]/60 group-hover:scale-105 transition-transform bg-[#105E34]">
               <Image
-                src="/810319879_18115925035810617_1916739058068536558_n.jpg"
+                src="/images/eathit-logo.jpg"
                 alt="EatHit Official Logo"
                 fill
                 priority
