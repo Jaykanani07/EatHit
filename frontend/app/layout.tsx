@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans, Caveat } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, Caveat, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -23,11 +23,20 @@ const caveat = Caveat({
   display: "swap",
 });
 
+const bebasNeue = Bebas_Neue({
+  variable: "--font-bebas",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "EatHit Lite — The Crunch of India | Authentic Roasted Gujarati Khakhra",
   description:
     "100% Baked Not Fried, crispy, everyday goodness. Available at Patel Brothers, Subzi Mandi, and US grocery stores.",
 };
+
+import Header from "./components/Header";
 
 export default function RootLayout({
   children,
@@ -37,9 +46,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable} h-full overflow-hidden`}
+      className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable} ${bebasNeue.variable} h-full`}
     >
-      <body className="h-full max-h-screen bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white overflow-hidden">
+      <body className="min-h-full bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white">
+        <Header />
         {children}
       </body>
     </html>

@@ -13,6 +13,7 @@
 @theme {
   --font-outfit: var(--font-outfit), system-ui, -apple-system, sans-serif;
   --font-jakarta: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  --font-bebas: var(--font-bebas), "Bebas Neue", var(--font-outfit), Impact, "Arial Narrow", sans-serif;
   --color-parchment: #FBF8F3;
   --color-parchment-subtle: #F3ECE2;
   --color-brand-red: #DC2626;

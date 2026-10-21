@@ -279,6 +279,8 @@ export default function TheCrunchOfIndiaHero() {
   const [isAnimating, setIsAnimating] = useState(false);
   const wheelLockRef = useRef(false);
   const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const isTransitioningToNextRef = useRef(false);
 
   const currentIndex = SEQUENCE[currentStep];
   const prevIndex = SEQUENCE[prevStep];
@@ -293,14 +295,47 @@ export default function TheCrunchOfIndiaHero() {
     });
   }, []);
 
+  // Control page scroll locking:
+  // When at the hero section and haven't finished scrolling to the last khakhra (Methi),
+  // lock body scroll so Section 1 CANNOT be skipped and user scrolls through all khakhras.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (currentStep < SEQUENCE.length - 1 && window.scrollY <= 10) {
+      document.body.style.overflowY = "hidden";
+    } else {
+      document.body.style.overflowY = "";
+    }
+
+    return () => {
+      document.body.style.overflowY = "";
+    };
+  }, [currentStep]);
+
   const goToNext = useCallback(() => {
     if (isAnimating) return;
     if (currentStep >= SEQUENCE.length - 1) return; // Do not advance past the last khakhra
     setIsAnimating(true);
     setDirection(1);
     setPrevStep(currentStep);
-    setCurrentStep((prev) => Math.min(prev + 1, SEQUENCE.length - 1));
+    const nextStep = Math.min(currentStep + 1, SEQUENCE.length - 1);
+    setCurrentStep(nextStep);
     setTimeout(() => setIsAnimating(false), 550);
+
+    // If advancing to the final khakhra (Methi, step 4), once it centers and settles,
+    // smoothly bring in the next section (Brand Statement)
+    if (nextStep === SEQUENCE.length - 1) {
+      setTimeout(() => {
+        document.body.style.overflowY = "";
+        if (window.scrollY <= 20) {
+          isTransitioningToNextRef.current = true;
+          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+          setTimeout(() => {
+            isTransitioningToNextRef.current = false;
+          }, 1200);
+        }
+      }, 1000);
+    }
   }, [currentStep, isAnimating]);
 
   const goToPrev = useCallback(() => {
@@ -323,26 +358,59 @@ export default function TheCrunchOfIndiaHero() {
       setPrevStep(currentStep);
       setCurrentStep(targetStep);
       setTimeout(() => setIsAnimating(false), 550);
+
+      if (targetStep === SEQUENCE.length - 1) {
+        setTimeout(() => {
+          document.body.style.overflowY = "";
+          if (window.scrollY <= 20) {
+            isTransitioningToNextRef.current = true;
+            document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+            setTimeout(() => {
+              isTransitioningToNextRef.current = false;
+            }, 1200);
+          }
+        }, 1000);
+      }
     },
     [currentStep, isAnimating]
   );
 
-  // Desktop wheel scroll advances carousel smoothly within bounds
+  // Desktop wheel scroll advances carousel smoothly with right-side entries
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (wheelLockRef.current) return;
+      const isAtTop = window.scrollY <= 10;
       const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(delta) > 25) {
+      if (Math.abs(delta) <= 20) return;
+
+      if (isAtTop) {
         if (delta > 0) {
+          // Scrolling DOWN
           if (currentStep < SEQUENCE.length - 1) {
+            // First section is compulsory and cannot be skipped by scrolling
+            e.preventDefault();
+            if (wheelLockRef.current) return;
             wheelLockRef.current = true;
             goToNext();
             setTimeout(() => {
               wheelLockRef.current = false;
             }, 550);
+          } else {
+            // Already at the last khakhra (Methi)
+            // Unlock body scroll and scroll down to the 2nd section smoothly
+            document.body.style.overflowY = "";
+            if (!isTransitioningToNextRef.current) {
+              isTransitioningToNextRef.current = true;
+              document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+              setTimeout(() => {
+                isTransitioningToNextRef.current = false;
+              }, 1200);
+            }
           }
-        } else {
+        } else if (delta < 0) {
+          // Scrolling UP
           if (currentStep > 0) {
+            e.preventDefault();
+            if (wheelLockRef.current) return;
             wheelLockRef.current = true;
             goToPrev();
             setTimeout(() => {
@@ -353,7 +421,7 @@ export default function TheCrunchOfIndiaHero() {
       }
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
   }, [goToNext, goToPrev, currentStep]);
 
@@ -361,7 +429,11 @@ export default function TheCrunchOfIndiaHero() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        goToNext();
+        if (currentStep < SEQUENCE.length - 1) {
+          goToNext();
+        } else {
+          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+        }
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         goToPrev();
       }
@@ -369,23 +441,37 @@ export default function TheCrunchOfIndiaHero() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNext, goToPrev]);
+  }, [goToNext, goToPrev, currentStep]);
 
   // Touch swipe support for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
     const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
     const diffX = touchEndX - touchStartXRef.current;
+    const diffY = touchEndY - touchStartYRef.current;
     touchStartXRef.current = null;
-    if (Math.abs(diffX) > 40) {
-      if (diffX < 0) {
-        goToNext();
+    touchStartYRef.current = null;
+
+    const isHorizontal = Math.abs(diffX) > Math.abs(diffY);
+    const delta = isHorizontal ? diffX : diffY;
+
+    if (Math.abs(delta) > 35) {
+      if (delta < 0) {
+        if (currentStep < SEQUENCE.length - 1) {
+          goToNext();
+        } else {
+          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+        }
       } else {
-        goToPrev();
+        if (currentStep > 0) {
+          goToPrev();
+        }
       }
     }
   };
@@ -399,47 +485,7 @@ export default function TheCrunchOfIndiaHero() {
       onTouchEnd={handleTouchEnd}
     >
       {/* ========================================================= */}
-      {/* 1. FIXED HEADER / TOP NAVIGATION (VIEWPORT OVERLAY)       */}
-      {/* ========================================================= */}
-      <header className="fixed top-0 inset-x-0 z-50 w-full pt-3 sm:pt-4 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between pointer-events-auto">
-        {/* Left: Official EatHit Brand Circular Logo */}
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center gap-2 group" aria-label="EatHit Home">
-            <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full overflow-hidden shadow-md border-2 border-[#EAB308]/60 group-hover:scale-105 transition-transform bg-[#105E34]">
-              <Image
-                src="/images/eathit-logo.jpg"
-                alt="EatHit Official Logo"
-                fill
-                priority
-                sizes="52px"
-                className="object-cover"
-              />
-            </div>
-          </Link>
-        </div>
-
-        {/* Center: Navigation Links */}
-        <nav className="hidden md:flex items-center justify-center gap-7 lg:gap-9 text-xs sm:text-sm font-semibold text-[#2B1810]">
-          <Link
-            href="/"
-            className="relative py-1 text-[#2B1810] font-bold after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#A82810]"
-          >
-            Home
-          </Link>
-          <Link href="#products" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
-            Products
-          </Link>
-          <Link href="#contact" className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors">
-            Contact
-          </Link>
-        </nav>
-
-        {/* Right Spacer for Symmetrical Nav Centering */}
-        <div className="w-12 h-12 sm:w-13 sm:h-13 pointer-events-none hidden md:block" aria-hidden="true" />
-      </header>
-
-      {/* ========================================================= */}
-      {/* 2. 16:9 PROPORTIONAL STAGE WITH PERCENTAGE-BASED LAYERS   */}
+      {/* 16:9 PROPORTIONAL STAGE WITH PERCENTAGE-BASED LAYERS      */}
       {/* ========================================================= */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 aspect-video w-[max(100vw,177.78vh)] @container">
