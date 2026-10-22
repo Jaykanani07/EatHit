@@ -1,62 +1,87 @@
 "use client";
 
-import React, { useRef } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-} from "framer-motion";
+import React, { useRef, useEffect, useCallback } from "react";
+import { useReducedMotion } from "framer-motion";
 
-/**
- * Brand Statement Configuration
- * The headline and supporting copy are kept editable in one single location.
- */
 export interface BrandStatementConfig {
   headlineLine1: string;
   headlineLine2: string;
-  supportingText: string;
 }
 
 export const BRAND_STATEMENT_COPY: BrandStatementConfig = {
-  headlineLine1: "BORN TO",
-  headlineLine2: "CRUNCH.",
-  supportingText: "A little crunch. A lot of India.",
+  headlineLine1: "100% ROASTED.",
+  headlineLine2: "NEVER FRIED.",
 };
 
-const BRAND_RED = "#B72E32";
+// Bavet signature crimson red / EatHit brand red
+const BRAND_RED = "#C33130";
 
-// 5 Top Rays (bursting upward)
-const TOP_RAYS = [
-  { id: "top-1", x1: 75, y1: 54, x2: 55, y2: 12, opacity: 0.9 },
-  { id: "top-2", x1: 140, y1: 55, x2: 130, y2: 8, opacity: 0.8 },
-  { id: "top-3", x1: 200, y1: 56, x2: 200, y2: 4, opacity: 1.0 },
-  { id: "top-4", x1: 260, y1: 55, x2: 270, y2: 8, opacity: 0.8 },
-  { id: "top-5", x1: 325, y1: 54, x2: 345, y2: 12, opacity: 0.9 },
-];
+interface RayLine {
+  angle: number; // in radians [0, 2*PI]
+  dist: number; // current travel distance from inner clearance (0 to maxTravel)
+  maxTravel: number; // total travel distance for this ray
+  speed: number; // px per second
+  length: number; // length of the dash line
+  width: number; // stroke width
+  alphaMax: number; // peak opacity
+}
 
-// 5 Bottom Rays (bursting downward)
-const BOTTOM_RAYS = [
-  { id: "bottom-1", x1: 75, y1: 6, x2: 55, y2: 48, opacity: 0.9 },
-  { id: "bottom-2", x1: 140, y1: 5, x2: 130, y2: 52, opacity: 0.8 },
-  { id: "bottom-3", x1: 200, y1: 4, x2: 200, y2: 56, opacity: 1.0 },
-  { id: "bottom-4", x1: 260, y1: 5, x2: 270, y2: 52, opacity: 0.8 },
-  { id: "bottom-5", x1: 325, y1: 6, x2: 345, y2: 48, opacity: 0.9 },
-];
+interface ArchedLineProps {
+  text: string;
+  isTopLine: boolean;
+}
 
-// 3 Left Rays (bursting leftward)
-const LEFT_RAYS = [
-  { id: "left-1", x1: 54, y1: 45, x2: 12, y2: 25, opacity: 0.9 },
-  { id: "left-2", x1: 56, y1: 110, x2: 6, y2: 110, opacity: 1.0 },
-  { id: "left-3", x1: 54, y1: 175, x2: 12, y2: 195, opacity: 0.85 },
-];
+/**
+ * Renders a line of text warped in Bavet's signature arched woodblock typography:
+ * - Top line: Top contour dips into a parabolic bowl in the center, baseline is flat.
+ * - Bottom line: Bottom contour arches UP in the center, top baseline is flat.
+ * - Outer characters tilt subtly outward for that handcrafted vintage block flare.
+ */
+function ArchedLine({ text, isTopLine }: ArchedLineProps) {
+  const chars = text.split("");
+  const total = chars.length;
 
-// 3 Right Rays (bursting rightward)
-const RIGHT_RAYS = [
-  { id: "right-1", x1: 6, y1: 45, x2: 48, y2: 25, opacity: 0.9 },
-  { id: "right-2", x1: 4, y1: 110, x2: 54, y2: 110, opacity: 1.0 },
-  { id: "right-3", x1: 6, y1: 175, x2: 48, y2: 195, opacity: 0.85 },
-];
+  return (
+    <div
+      className="inline-flex items-center justify-center select-none whitespace-nowrap leading-[0.84]"
+      style={{
+        transformStyle: "preserve-3d",
+      }}
+    >
+      {chars.map((char, i) => {
+        if (char === " ") {
+          return <span key={i} className="inline-block w-[0.24em]" />;
+        }
+
+        // Normalized horizontal position: -1 (left edge) to 0 (center) to +1 (right edge)
+        const t = total > 1 ? (i / (total - 1) - 0.5) * 2 : 0;
+        // Parabolic arch: 0 at edges, 1 at center
+        const curve = 1 - t * t;
+
+        // Scale factor: outer letters are 100% height, center letters are ~84% height
+        const scaleY = 1 - curve * 0.16;
+
+        // Subtle rotation flare towards edges (like a vintage woodblock arch)
+        const rotateDeg = t * 2.6;
+
+        return (
+          <span
+            key={i}
+            className="inline-block"
+            style={{
+              transform: `scaleY(${scaleY}) rotate(${rotateDeg}deg)`,
+              transformOrigin: isTopLine ? "center bottom" : "center top",
+              display: "inline-block",
+              willChange: "transform",
+            }}
+          >
+            {char}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 interface BrandStatementSectionProps {
   copy?: Partial<BrandStatementConfig>;
@@ -69,242 +94,343 @@ export default function BrandStatementSection({
 }: BrandStatementSectionProps) {
   const headlineLine1 = copy?.headlineLine1 ?? BRAND_STATEMENT_COPY.headlineLine1;
   const headlineLine2 = copy?.headlineLine2 ?? BRAND_STATEMENT_COPY.headlineLine2;
-  const supportingText = copy?.supportingText ?? BRAND_STATEMENT_COPY.supportingText;
 
   const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const textStageRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const prefersReducedMotion = useReducedMotion();
 
-  // Scroll-linked progress for continuous, responsive BAVET scroll effect
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
+  // Mouse tracking state for 3D cursor-facing tilt
+  const mouseState = useRef({
+    targetX: 0, // normalized [-1, 1]
+    targetY: 0,
+    currentRotateX: 0,
+    currentRotateY: 0,
+    currentZ: 0,
+    isHovered: false,
+    cursorAngle: 0,
   });
 
-  // Dynamic transforms linked to viewport scroll position
-  const headlineScale = useTransform(
-    scrollYProgress,
-    [0.1, 0.45, 0.85],
-    prefersReducedMotion ? [1, 1, 1] : [0.84, 1.0, 1.04]
-  );
-  const headlineY = useTransform(
-    scrollYProgress,
-    [0.1, 0.45, 0.85],
-    prefersReducedMotion ? [0, 0, 0] : [55, 0, -25]
-  );
-  const headlineOpacity = useTransform(
-    scrollYProgress,
-    [0.08, 0.32],
-    prefersReducedMotion ? [1, 1] : [0, 1]
-  );
+  // =========================================================================
+  // 1. CONTINUOUS RADIATING RAYS CANVAS ENGINE
+  // Lines are continuously emitted outward from behind the arched text
+  // =========================================================================
+  useEffect(() => {
+    if (prefersReducedMotion) return;
 
-  // Radiating rays dynamic burst scale & kinetic rotation
-  const raysScale = useTransform(
-    scrollYProgress,
-    [0.12, 0.46, 0.85],
-    prefersReducedMotion ? [1, 1, 1] : [0.35, 1.0, 1.08]
-  );
-  const raysRotate = useTransform(
-    scrollYProgress,
-    [0.1, 0.9],
-    prefersReducedMotion ? [0, 0] : [-12, 12]
-  );
-  const raysOpacity = useTransform(
-    scrollYProgress,
-    [0.12, 0.34],
-    prefersReducedMotion ? [1, 1] : [0, 1]
-  );
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-  // Supporting line glide in
-  const supportingY = useTransform(
-    scrollYProgress,
-    [0.25, 0.5],
-    prefersReducedMotion ? [0, 0] : [28, 0]
-  );
-  const supportingOpacity = useTransform(
-    scrollYProgress,
-    [0.26, 0.46],
-    prefersReducedMotion ? [1, 1] : [0, 1]
-  );
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    // Responsive line count: 84 lines on desktop, 44 on mobile for dense energetic burst
+    const lineCount = window.innerWidth < 768 ? 44 : 84;
+
+    const createRay = (startProgress?: number): RayLine => {
+      const maxTravel =
+        window.innerWidth < 768
+          ? 220 + Math.random() * 180
+          : 360 + Math.random() * 320;
+      const speed = 120 + Math.random() * 160; // px/sec
+      const length =
+        window.innerWidth < 768
+          ? 16 + Math.random() * 26
+          : 22 + Math.random() * 42;
+      const width =
+        window.innerWidth < 768
+          ? Math.random() < 0.3 ? 2.0 : 2.8
+          : Math.random() < 0.25 ? 2.4 : 3.4;
+
+      return {
+        angle: Math.random() * Math.PI * 2,
+        dist: startProgress !== undefined ? startProgress * maxTravel : 0,
+        maxTravel,
+        speed,
+        length,
+        width,
+        alphaMax: 0.8 + Math.random() * 0.2,
+      };
+    };
+
+    // Initialize lines scattered at various progress stages
+    const rays: RayLine[] = [];
+    for (let i = 0; i < lineCount; i++) {
+      // Disperse uniformly so rays are continuously visible immediately
+      rays.push(createRay(i / lineCount + Math.random() * (1 / lineCount)));
+    }
+
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Animation render loop
+    const render = (now: number) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Center with subtle cursor parallax tracking
+      const cx = width / 2 + mouseState.current.targetX * 16;
+      const cy = height / 2 + mouseState.current.targetY * 16;
+
+      // Clearance ellipse around text bounds so lines emerge from behind the text
+      const wRadius = Math.min(width * 0.34, 300);
+      const hRadius = Math.min(height * 0.24, 140);
+
+      // Render all active radiating lines
+      for (let i = 0; i < rays.length; i++) {
+        const ray = rays[i];
+
+        // Move outward along ray
+        ray.dist += ray.speed * dt;
+
+        // Reset when reaching outer boundary
+        if (ray.dist >= ray.maxTravel) {
+          ray.dist = 0;
+          ray.angle = Math.random() * Math.PI * 2;
+          ray.maxTravel =
+            window.innerWidth < 768
+              ? 220 + Math.random() * 180
+              : 360 + Math.random() * 320;
+          ray.speed = 120 + Math.random() * 160;
+          ray.length =
+            window.innerWidth < 768
+              ? 16 + Math.random() * 26
+              : 22 + Math.random() * 42;
+          ray.alphaMax = 0.8 + Math.random() * 0.2;
+        }
+
+        // Calculate clearance offset at this specific angle
+        const cosA = Math.cos(ray.angle);
+        const sinA = Math.sin(ray.angle);
+        const innerClearance = Math.hypot(cosA * wRadius, sinA * hRadius) * 0.86;
+
+        const currentR = innerClearance + ray.dist;
+        const progress = Math.max(0, Math.min(1, ray.dist / ray.maxTravel));
+
+        // Smooth sine opacity envelope: 0 at start -> 1 at middle -> 0 at end
+        const alpha = Math.sin(progress * Math.PI) * ray.alphaMax;
+
+        // Position of the line segment
+        const xMid = cx + cosA * currentR;
+        const yMid = cy + sinA * currentR;
+        const halfLen = ray.length / 2;
+
+        const x1 = xMid - cosA * halfLen;
+        const y1 = yMid - sinA * halfLen;
+        const x2 = xMid + cosA * halfLen;
+        const y2 = yMid + sinA * halfLen;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `rgba(195, 49, 48, ${alpha})`;
+        ctx.lineWidth = ray.width;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    animationFrameId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, [prefersReducedMotion]);
+
+  // =========================================================================
+  // 2. 3D CURSOR-TRACKING TILT ENGINE (BAVET MATHEMATICAL MODEL)
+  // Text physically turns and faces towards wherever the cursor is located
+  // =========================================================================
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+
+    // Normalized mouse position from center [-1, 1]
+    const nx = Math.max(-1, Math.min(1, dx / (window.innerWidth * 0.5)));
+    const ny = Math.max(-1, Math.min(1, dy / (window.innerHeight * 0.5)));
+
+    mouseState.current.targetX = nx;
+    mouseState.current.targetY = ny;
+    mouseState.current.isHovered = true;
+    mouseState.current.cursorAngle = Math.atan2(dy, dx);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseState.current.targetX = 0;
+    mouseState.current.targetY = 0;
+    mouseState.current.isHovered = false;
+  }, []);
+
+  // Smooth lerp frame loop for 3D perspective orientation
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    let animId: number;
+
+    const update3DTilt = () => {
+      const state = mouseState.current;
+
+      // Bavet degrees:
+      // When cursor is at right (targetX > 0), rotateY turns positive to face right
+      // When cursor is at top (targetY < 0), rotateX turns positive to face up
+      const targetRotateY = state.isHovered ? state.targetX * 18 : 0;
+      const targetRotateX = state.isHovered ? -state.targetY * 18 : 0;
+      const targetZ = state.isHovered ? 36 : 0;
+
+      // Smooth interpolation factor (0.12)
+      state.currentRotateX += (targetRotateX - state.currentRotateX) * 0.12;
+      state.currentRotateY += (targetRotateY - state.currentRotateY) * 0.12;
+      state.currentZ += (targetZ - state.currentZ) * 0.12;
+
+      if (textStageRef.current) {
+        textStageRef.current.style.transform = `rotateX(${state.currentRotateX.toFixed(
+          2
+        )}deg) rotateY(${state.currentRotateY.toFixed(
+          2
+        )}deg) translateZ(${state.currentZ.toFixed(2)}px)`;
+      }
+
+      animId = requestAnimationFrame(update3DTilt);
+    };
+
+    animId = requestAnimationFrame(update3DTilt);
+
+    const sectionEl = sectionRef.current;
+    if (sectionEl) {
+      sectionEl.addEventListener("mousemove", handleMouseMove);
+      sectionEl.addEventListener("mouseleave", handleMouseLeave);
+    }
+
+    return () => {
+      cancelAnimationFrame(animId);
+      if (sectionEl) {
+        sectionEl.removeEventListener("mousemove", handleMouseMove);
+        sectionEl.removeEventListener("mouseleave", handleMouseLeave);
+      }
+    };
+  }, [handleMouseMove, handleMouseLeave, prefersReducedMotion]);
 
   return (
     <section
       ref={sectionRef}
       id="brand-statement"
-      aria-label="Brand Statement: Born to Crunch"
-      className={`relative w-full min-h-screen min-h-[100svh] bg-[#F2F0E6] flex flex-col items-center justify-center px-4 sm:px-8 py-16 sm:py-20 md:py-24 overflow-x-clip select-none ${className}`}
+      aria-label="Brand Statement: 100% Roasted Never Fried"
+      className={`relative w-full min-h-screen min-h-[100svh] bg-[#F2F0E6] flex flex-col items-center justify-center px-4 sm:px-8 lg:px-12 py-12 sm:py-16 overflow-hidden select-none cursor-default ${className}`}
     >
-      {/* Central Content Composition with Scroll Transforms */}
-      <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center justify-center text-center">
-        
-        {/* Headline Staging Box with Radial Rays Perimeter */}
-        <div className="relative inline-flex flex-col items-center justify-center px-6 sm:px-10 md:px-14 py-4 sm:py-6">
+      {/* ========================================================= */}
+      {/* 1. SLANTED KINETIC BACKGROUND TYPOGRAPHY RIBBONS          */}
+      {/* Adds rich living rhythm and eliminates empty negative space */}
+      {/* ========================================================= */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 flex items-center justify-center opacity-[0.055]">
+        <div className="w-[145vw] -rotate-[7deg] flex flex-col gap-6 sm:gap-10 text-[#B72E32]">
+          {/* Row 1: Leftward Infinite Scroll */}
+          <div className="animate-marquee-left whitespace-nowrap flex items-center gap-8">
+            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
+              EATHIT KHAKHRA • 100% ROASTED ON TAWA • NEVER DEEP FRIED • STONE-GROUND WHOLE WHEAT •
+            </span>
+            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
+              EATHIT KHAKHRA • 100% ROASTED ON TAWA • NEVER DEEP FRIED • STONE-GROUND WHOLE WHEAT •
+            </span>
+          </div>
 
-          {/* ======================================================== */}
-          {/* Scroll-Driven Radiating Decorative Rays                  */}
-          {/* ======================================================== */}
-          <motion.div
-            style={{
-              scale: raysScale,
-              rotate: raysRotate,
-              opacity: raysOpacity,
-            }}
-            className="absolute inset-0 pointer-events-none select-none"
-            aria-hidden="true"
-          >
-            {/* 1. Top Rays Cluster */}
-            <div
-              className="absolute -top-10 sm:-top-14 md:-top-16 left-1/2 -translate-x-1/2 w-[85%] max-w-[420px] h-11 sm:h-14 md:h-16 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 400 60" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                {TOP_RAYS.map((ray) => (
-                  <line
-                    key={ray.id}
-                    x1={ray.x1}
-                    y1={ray.y1}
-                    x2={ray.x2}
-                    y2={ray.y2}
-                    stroke={BRAND_RED}
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    opacity={ray.opacity}
-                  />
-                ))}
-              </svg>
-            </div>
+          {/* Row 2: Rightward Infinite Scroll (Hollow Outline Stroke) */}
+          <div className="animate-marquee-right whitespace-nowrap flex items-center gap-8 text-outline-brand-thick">
+            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
+              THE CRUNCH OF INDIA • AUTHENTIC GUJARATI HERITAGE • CRISPY EVERYDAY GOODNESS •
+            </span>
+            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
+              THE CRUNCH OF INDIA • AUTHENTIC GUJARATI HERITAGE • CRISPY EVERYDAY GOODNESS •
+            </span>
+          </div>
 
-            {/* 2. Bottom Rays Cluster */}
-            <div
-              className="absolute -bottom-10 sm:-bottom-14 md:-bottom-16 left-1/2 -translate-x-1/2 w-[85%] max-w-[420px] h-11 sm:h-14 md:h-16 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 400 60" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                {BOTTOM_RAYS.map((ray) => (
-                  <line
-                    key={ray.id}
-                    x1={ray.x1}
-                    y1={ray.y1}
-                    x2={ray.x2}
-                    y2={ray.y2}
-                    stroke={BRAND_RED}
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    opacity={ray.opacity}
-                  />
-                ))}
-              </svg>
-            </div>
-
-            {/* 3. Left Rays Cluster */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -left-8 sm:-left-12 md:-left-16 w-10 sm:w-13 md:w-16 h-[80%] max-h-[220px] pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 60 220" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                {LEFT_RAYS.map((ray) => (
-                  <line
-                    key={ray.id}
-                    x1={ray.x1}
-                    y1={ray.y1}
-                    x2={ray.x2}
-                    y2={ray.y2}
-                    stroke={BRAND_RED}
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    opacity={ray.opacity}
-                  />
-                ))}
-              </svg>
-            </div>
-
-            {/* 4. Right Rays Cluster */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -right-8 sm:-right-12 md:-right-16 w-10 sm:w-13 md:w-16 h-[80%] max-h-[220px] pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 60 220" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                {RIGHT_RAYS.map((ray) => (
-                  <line
-                    key={ray.id}
-                    x1={ray.x1}
-                    y1={ray.y1}
-                    x2={ray.x2}
-                    y2={ray.y2}
-                    stroke={BRAND_RED}
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    opacity={ray.opacity}
-                  />
-                ))}
-              </svg>
-            </div>
-
-            {/* 5. Four Corner Burst Rays (hidden on narrow screens to prevent crowding) */}
-            <div
-              className="hidden sm:block absolute -top-4 -left-4 sm:-top-6 sm:-left-6 w-9 sm:w-12 h-9 sm:h-12 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 50 50" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                <line x1="44" y1="44" x2="8" y2="8" stroke={BRAND_RED} strokeWidth="3.2" strokeLinecap="round" opacity={0.75} />
-              </svg>
-            </div>
-
-            <div
-              className="hidden sm:block absolute -top-4 -right-4 sm:-top-6 sm:-right-6 w-9 sm:w-12 h-9 sm:h-12 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 50 50" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                <line x1="6" y1="44" x2="42" y2="8" stroke={BRAND_RED} strokeWidth="3.2" strokeLinecap="round" opacity={0.75} />
-              </svg>
-            </div>
-
-            <div
-              className="hidden sm:block absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 w-9 sm:w-12 h-9 sm:h-12 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 50 50" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                <line x1="44" y1="6" x2="8" y2="42" stroke={BRAND_RED} strokeWidth="3.2" strokeLinecap="round" opacity={0.75} />
-              </svg>
-            </div>
-
-            <div
-              className="hidden sm:block absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-9 sm:w-12 h-9 sm:h-12 pointer-events-none select-none"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 50 50" className="w-full h-full overflow-visible" fill="none" role="presentation">
-                <line x1="6" y1="6" x2="42" y2="42" stroke={BRAND_RED} strokeWidth="3.2" strokeLinecap="round" opacity={0.75} />
-              </svg>
-            </div>
-          </motion.div>
-
-          {/* ======================================================== */}
-          {/* Scroll-Driven Bold Condensed Headline                    */}
-          {/* ======================================================== */}
-          <motion.h2
-            style={{
-              fontSize: "clamp(3.5rem, 10vw, 9rem)",
-              scale: headlineScale,
-              y: headlineY,
-              opacity: headlineOpacity,
-            }}
-            className="relative z-10 m-0 font-black uppercase text-center text-[#B72E32] tracking-tight leading-[0.85] font-[family-name:var(--font-bebas),var(--font-outfit),Impact,sans-serif]"
-          >
-            <span className="block">{headlineLine1}</span>
-            <span className="block">{headlineLine2}</span>
-          </motion.h2>
+          {/* Row 3: Leftward Infinite Scroll */}
+          <div className="animate-marquee-left whitespace-nowrap flex items-center gap-8">
+            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
+              ZERO TRANS FAT • PURE ROCK SALT • KASURI METHI • ROASTED JEERA • REAL SPICES •
+            </span>
+            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
+              ZERO TRANS FAT • PURE ROCK SALT • KASURI METHI • ROASTED JEERA • REAL SPICES •
+            </span>
+          </div>
         </div>
+      </div>
 
-        {/* Supporting Line with Scroll Glide */}
-        <motion.p
+      {/* Warm Ambient Radial Tawa Glow behind center */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[750px] h-[600px] sm:h-[750px] rounded-full blur-[140px] pointer-events-none z-0"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(217, 119, 6, 0.16) 0%, rgba(195, 49, 48, 0.08) 45%, transparent 70%)",
+        }}
+      />
+
+      {/* Continuous Radiating Rays Canvas spanning the full section */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none select-none z-[1]"
+        aria-hidden="true"
+      />
+
+      {/* ========================================================= */}
+      {/* 2. 3D PERSPECTIVE STAGE: FACING TEXT                      */}
+      {/* ========================================================= */}
+      <div
+        ref={stageRef}
+        className="relative z-10 w-full max-w-6xl mx-auto flex items-center justify-center py-10 sm:py-16 pointer-events-none"
+        style={{
+          perspective: "1000px",
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {/* 3D Cursor-Facing Headline Box */}
+        <div
+          ref={textStageRef}
+          className="relative z-10 flex flex-col items-center justify-center text-center pointer-events-none select-none px-4"
           style={{
-            y: supportingY,
-            opacity: supportingOpacity,
+            transformStyle: "preserve-3d",
+            willChange: "transform",
           }}
-          className="relative z-10 mt-6 sm:mt-8 md:mt-10 font-[family-name:var(--font-jakarta),sans-serif] text-xs sm:text-sm md:text-base font-semibold tracking-[0.24em] uppercase text-[#8C282B] max-w-xl mx-auto"
         >
-          {supportingText}
-        </motion.p>
+          <h2
+            style={{
+              fontSize: "clamp(4.0rem, 11.5vw, 10.5rem)",
+              color: BRAND_RED,
+            }}
+            className="m-0 font-black uppercase text-center tracking-tight font-[family-name:var(--font-bebas),var(--font-outfit),Impact,sans-serif] flex flex-col items-center justify-center"
+          >
+            {/* Top Line: Arched Bowl Contour */}
+            <ArchedLine text={headlineLine1} isTopLine={true} />
 
+            {/* Bottom Line: Arched Crown Contour */}
+            <ArchedLine text={headlineLine2} isTopLine={false} />
+          </h2>
+        </div>
       </div>
     </section>
   );
