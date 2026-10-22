@@ -225,9 +225,6 @@ export default function BrandStatementSection({
         const currentR = innerClearance + ray.dist;
         const progress = Math.max(0, Math.min(1, ray.dist / ray.maxTravel));
 
-        // Smooth sine opacity envelope: 0 at start -> 1 at middle -> 0 at end
-        const alpha = Math.sin(progress * Math.PI) * ray.alphaMax;
-
         // Position of the line segment
         const xMid = cx + cosA * currentR;
         const yMid = cy + sinA * currentR;
@@ -238,13 +235,26 @@ export default function BrandStatementSection({
         const x2 = xMid + cosA * halfLen;
         const y2 = yMid + sinA * halfLen;
 
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.strokeStyle = `rgba(195, 49, 48, ${alpha})`;
-        ctx.lineWidth = ray.width;
-        ctx.lineCap = "round";
-        ctx.stroke();
+        // Smooth edge fade-out so rays naturally extinguish before the viewport edges
+        const fadeMargin = 75;
+        const fadeTop = Math.min(1, Math.max(0, yMid / fadeMargin));
+        const fadeBottom = Math.min(1, Math.max(0, (height - yMid) / fadeMargin));
+        const fadeLeft = Math.min(1, Math.max(0, xMid / fadeMargin));
+        const fadeRight = Math.min(1, Math.max(0, (width - xMid) / fadeMargin));
+        const edgeFade = fadeTop * fadeBottom * fadeLeft * fadeRight;
+
+        // Smooth sine opacity envelope: 0 at start -> 1 at middle -> 0 at end
+        const alpha = Math.sin(progress * Math.PI) * ray.alphaMax * edgeFade;
+
+        if (alpha > 0.01) {
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `rgba(195, 49, 48, ${alpha})`;
+          ctx.lineWidth = ray.width;
+          ctx.lineCap = "round";
+          ctx.stroke();
+        }
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -347,7 +357,15 @@ export default function BrandStatementSection({
       {/* 1. SLANTED KINETIC BACKGROUND TYPOGRAPHY RIBBONS          */}
       {/* Adds rich living rhythm and eliminates empty negative space */}
       {/* ========================================================= */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 flex items-center justify-center opacity-[0.055]">
+      <div
+        className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 flex items-center justify-center opacity-[0.055]"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
+        }}
+      >
         <div className="w-[145vw] -rotate-[7deg] flex flex-col gap-6 sm:gap-10 text-[#B72E32]">
           {/* Row 1: Leftward Infinite Scroll */}
           <div className="animate-marquee-left whitespace-nowrap flex items-center gap-8">

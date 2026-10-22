@@ -599,6 +599,15 @@ export default function TheCrunchOfIndiaHero() {
           </div>
         </div>
       </div>
+
+      {/* Layer 8: Seamless Melt Transition Gradient into Section 2 (#F2F0E6) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 sm:h-48 pointer-events-none select-none z-40"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(242, 240, 230, 0) 0%, rgba(242, 240, 230, 0.35) 45%, rgba(242, 240, 230, 0.85) 80%, #F2F0E6 100%)",
+        }}
+      />
     </section>
   );
 }
