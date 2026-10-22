@@ -48,7 +48,7 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable} ${bebasNeue.variable} h-full`}
     >
-      <body className="min-h-full bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white">
+      <body className="relative min-h-full bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white">
         <Header />
         {children}
       </body>

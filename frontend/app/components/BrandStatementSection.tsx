@@ -131,7 +131,7 @@ export default function BrandStatementSection({
       ref={sectionRef}
       id="brand-statement"
       aria-label="Brand Statement: Born to Crunch"
-      className={`relative w-full min-h-[90svh] lg:min-h-[96svh] bg-[#F2F0E6] flex flex-col items-center justify-center px-4 sm:px-8 py-20 sm:py-24 md:py-28 overflow-x-clip select-none ${className}`}
+      className={`relative w-full min-h-screen min-h-[100svh] bg-[#F2F0E6] flex flex-col items-center justify-center px-4 sm:px-8 py-16 sm:py-20 md:py-24 overflow-x-clip select-none ${className}`}
     >
       {/* Central Content Composition with Scroll Transforms */}
       <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center justify-center text-center">

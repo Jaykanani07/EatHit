@@ -134,25 +134,20 @@ function ProductSlot({
   index,
   currentIndex,
   prevIndex,
-  onSelect,
 }: {
   flavor: FlavorItem;
   index: number;
   currentIndex: number;
   prevIndex: number;
-  onSelect: (offset: number, index: number) => void;
 }) {
   const offset = (((index - currentIndex + 7) % 5) - 2) as -2 | -1 | 0 | 1 | 2;
   const prevOffset = (((index - prevIndex + 7) % 5) - 2) as -2 | -1 | 0 | 1 | 2;
   const isWrap = Math.abs(offset - prevOffset) > 2;
   const slot = SLOTS[offset];
-  const isSelectable = offset !== 0;
 
   return (
     <motion.div
-      onClick={() => isSelectable && onSelect(offset, index)}
-      className={`absolute -translate-x-1/2 select-none ${slot.responsiveClass} ${slot.shadow} ${isSelectable ? "cursor-pointer hover:brightness-105 pointer-events-auto" : "cursor-default pointer-events-none"
-        }`}
+      className={`absolute -translate-x-1/2 select-none ${slot.responsiveClass} ${slot.shadow} cursor-default pointer-events-none`}
       initial={false}
       animate={{
         left: slot.left,
@@ -271,6 +266,7 @@ function Disc({
 // Step 3: Masala Khakhra (index 0)
 // Step 4: Methi Khakhra (index 1) - Final product, bounded (does not loop)
 const SEQUENCE: number[] = [2, 3, 4, 0, 1];
+const LOCK_DURATION_MS = 750;
 
 export default function TheCrunchOfIndiaHero() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -278,6 +274,7 @@ export default function TheCrunchOfIndiaHero() {
   const [direction, setDirection] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const wheelLockRef = useRef(false);
+  const wasScrolledDownRef = useRef(false);
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const isTransitioningToNextRef = useRef(false);
@@ -293,6 +290,13 @@ export default function TheCrunchOfIndiaHero() {
       const img2 = new window.Image();
       img2.src = f.discImg;
     });
+  }, []);
+
+  // Cleanup body overflow on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflowY = "";
+    };
   }, []);
 
   // Control page scroll locking:
@@ -312,110 +316,101 @@ export default function TheCrunchOfIndiaHero() {
     };
   }, [currentStep]);
 
+  // Absorb upward momentum when scrolling back to the top from Section 2
+  useEffect(() => {
+    const handleScroll = () => {
+      const atTop = window.scrollY <= 10;
+      if (!atTop) {
+        wasScrolledDownRef.current = true;
+      } else if (wasScrolledDownRef.current) {
+        // Just returned to top from below: absorb momentum so Methi isn't accidentally skipped
+        wheelLockRef.current = true;
+        setTimeout(() => {
+          wheelLockRef.current = false;
+          wasScrolledDownRef.current = false;
+        }, 500);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const goToNext = useCallback(() => {
-    if (isAnimating) return;
+    if (isAnimating || wheelLockRef.current) return;
     if (currentStep >= SEQUENCE.length - 1) return; // Do not advance past the last khakhra
+
     setIsAnimating(true);
+    wheelLockRef.current = true;
     setDirection(1);
     setPrevStep(currentStep);
     const nextStep = Math.min(currentStep + 1, SEQUENCE.length - 1);
     setCurrentStep(nextStep);
-    setTimeout(() => setIsAnimating(false), 550);
 
-    // If advancing to the final khakhra (Methi, step 4), once it centers and settles,
-    // smoothly bring in the next section (Brand Statement)
-    if (nextStep === SEQUENCE.length - 1) {
-      setTimeout(() => {
-        document.body.style.overflowY = "";
-        if (window.scrollY <= 20) {
-          isTransitioningToNextRef.current = true;
-          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
-          setTimeout(() => {
-            isTransitioningToNextRef.current = false;
-          }, 1200);
-        }
-      }, 1000);
-    }
+    setTimeout(() => {
+      setIsAnimating(false);
+      wheelLockRef.current = false;
+    }, LOCK_DURATION_MS);
   }, [currentStep, isAnimating]);
 
   const goToPrev = useCallback(() => {
-    if (isAnimating) return;
+    if (isAnimating || wheelLockRef.current) return;
     if (currentStep <= 0) return; // Do not move backwards past initial Plain khakhra
+
     setIsAnimating(true);
+    wheelLockRef.current = true;
     setDirection(-1);
     setPrevStep(currentStep);
     setCurrentStep((prev) => Math.max(prev - 1, 0));
-    setTimeout(() => setIsAnimating(false), 550);
+
+    setTimeout(() => {
+      setIsAnimating(false);
+      wheelLockRef.current = false;
+    }, LOCK_DURATION_MS);
   }, [currentStep, isAnimating]);
-
-  const handleSelect = useCallback(
-    (offset: number, index: number) => {
-      if (offset === 0 || isAnimating) return;
-      const targetStep = SEQUENCE.indexOf(index);
-      if (targetStep === -1 || targetStep === currentStep) return;
-      setIsAnimating(true);
-      setDirection(targetStep > currentStep ? 1 : -1);
-      setPrevStep(currentStep);
-      setCurrentStep(targetStep);
-      setTimeout(() => setIsAnimating(false), 550);
-
-      if (targetStep === SEQUENCE.length - 1) {
-        setTimeout(() => {
-          document.body.style.overflowY = "";
-          if (window.scrollY <= 20) {
-            isTransitioningToNextRef.current = true;
-            document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
-            setTimeout(() => {
-              isTransitioningToNextRef.current = false;
-            }, 1200);
-          }
-        }, 1000);
-      }
-    },
-    [currentStep, isAnimating]
-  );
 
   // Desktop wheel scroll advances carousel smoothly with right-side entries
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       const isAtTop = window.scrollY <= 10;
       const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(delta) <= 20) return;
+      if (Math.abs(delta) <= 15) return;
 
       if (isAtTop) {
+        // While animating or in cooldown lock, suppress all wheel events completely
+        // to prevent trailing wheel/trackpad inertia from cutting off transitions
+        if (wheelLockRef.current || isAnimating) {
+          e.preventDefault();
+          return;
+        }
+
         if (delta > 0) {
           // Scrolling DOWN
           if (currentStep < SEQUENCE.length - 1) {
             // First section is compulsory and cannot be skipped by scrolling
             e.preventDefault();
-            if (wheelLockRef.current) return;
-            wheelLockRef.current = true;
             goToNext();
-            setTimeout(() => {
-              wheelLockRef.current = false;
-            }, 550);
           } else {
             // Already at the last khakhra (Methi)
-            // Unlock body scroll and scroll down to the 2nd section smoothly
-            document.body.style.overflowY = "";
-            if (!isTransitioningToNextRef.current) {
-              isTransitioningToNextRef.current = true;
-              document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
-              setTimeout(() => {
-                isTransitioningToNextRef.current = false;
-              }, 1200);
+            // User has finished Section 1 and deliberately scrolled down to proceed to Section 2
+            if (isTransitioningToNextRef.current) {
+              e.preventDefault();
+              return;
             }
+
+            e.preventDefault();
+            isTransitioningToNextRef.current = true;
+            document.body.style.overflowY = "";
+            document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            setTimeout(() => {
+              isTransitioningToNextRef.current = false;
+            }, 1200);
           }
         } else if (delta < 0) {
           // Scrolling UP
           if (currentStep > 0) {
             e.preventDefault();
-            if (wheelLockRef.current) return;
-            wheelLockRef.current = true;
             goToPrev();
-            setTimeout(() => {
-              wheelLockRef.current = false;
-            }, 550);
           }
         }
       }
@@ -423,25 +418,28 @@ export default function TheCrunchOfIndiaHero() {
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [goToNext, goToPrev, currentStep]);
+  }, [goToNext, goToPrev, currentStep, isAnimating]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        if (isAnimating || wheelLockRef.current) return;
         if (currentStep < SEQUENCE.length - 1) {
           goToNext();
         } else {
-          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+          document.body.style.overflowY = "";
+          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        if (isAnimating || wheelLockRef.current) return;
         goToPrev();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNext, goToPrev, currentStep]);
+  }, [goToNext, goToPrev, currentStep, isAnimating]);
 
   // Touch swipe support for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -458,17 +456,22 @@ export default function TheCrunchOfIndiaHero() {
     touchStartXRef.current = null;
     touchStartYRef.current = null;
 
+    if (isAnimating || wheelLockRef.current) return;
+
     const isHorizontal = Math.abs(diffX) > Math.abs(diffY);
     const delta = isHorizontal ? diffX : diffY;
 
     if (Math.abs(delta) > 35) {
       if (delta < 0) {
+        // Swiping UP or LEFT -> Next
         if (currentStep < SEQUENCE.length - 1) {
           goToNext();
         } else {
-          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+          document.body.style.overflowY = "";
+          document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       } else {
+        // Swiping DOWN or RIGHT -> Prev
         if (currentStep > 0) {
           goToPrev();
         }
@@ -573,7 +576,6 @@ export default function TheCrunchOfIndiaHero() {
                 index={i}
                 currentIndex={currentIndex}
                 prevIndex={prevIndex}
-                onSelect={handleSelect}
               />
             ))}
 

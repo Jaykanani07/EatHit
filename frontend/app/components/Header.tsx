@@ -1,30 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 w-full transition-colors duration-300 pointer-events-auto select-none ${
-        isScrolled
-          ? "bg-[#FAF4EC]/92 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.06)] border-b border-[#2B1810]/10"
-          : "bg-transparent"
-      }`}
-    >
+    <header className="absolute top-0 inset-x-0 z-50 w-full bg-transparent pointer-events-auto select-none">
       {/* Exact fixed location container matching hero top overlay */}
       <div className="max-w-7xl mx-auto pt-3 sm:pt-4 pb-3 sm:pb-4 px-4 sm:px-8 flex items-center justify-between">
         {/* Left: Official EatHit Brand Circular Logo */}
