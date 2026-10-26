@@ -128,6 +128,13 @@ export default function BrandStatementSection({
     let animationFrameId: number;
     let lastTime = performance.now();
 
+    // Track size and DPR to avoid layout thrashing in render loop
+    const sizeRef = {
+      width: 0,
+      height: 0,
+      dpr: 1,
+    };
+
     // Responsive line count: 84 lines on desktop, 44 on mobile for dense energetic burst
     const lineCount = window.innerWidth < 768 ? 44 : 84;
 
@@ -164,35 +171,55 @@ export default function BrandStatementSection({
       rays.push(createRay(i / lineCount + Math.random() * (1 / lineCount)));
     }
 
-    const resizeCanvas = () => {
+    const updateSize = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      const w = Math.max(1, Math.floor(rect.width));
+      const h = Math.max(1, Math.floor(rect.height));
+
+      sizeRef.width = w;
+      sizeRef.height = h;
+      sizeRef.dpr = dpr;
+
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
     };
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    updateSize();
+
+    // ResizeObserver catches layout shifts like vertical scrollbars appearing
+    const resizeObserver = new ResizeObserver(() => {
+      updateSize();
+    });
+    resizeObserver.observe(canvas);
+    window.addEventListener("resize", updateSize);
 
     // Animation render loop
     const render = (now: number) => {
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      const { width, height, dpr } = sizeRef;
+      if (width <= 0 || height <= 0) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
 
-      ctx.clearRect(0, 0, width, height);
+      // 1. Reset transform to identity and wipe 100% of the canvas backing store buffer
+      // This completely prevents ghost pixels / uncleared artifacts on right edge
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Set DPR scale transform for crisp drawing
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // Center with subtle cursor parallax tracking
       const cx = width / 2 + mouseState.current.targetX * 16;
       const cy = height / 2 + mouseState.current.targetY * 16;
 
       // Clearance ellipse around text bounds so lines emerge from behind the text
-      const wRadius = Math.min(width * 0.34, 300);
-      const hRadius = Math.min(height * 0.24, 140);
+      const wRadius = Math.min(width * 0.30, 260);
+      const hRadius = Math.min(height * 0.20, 115);
 
       // Render all active radiating lines
       for (let i = 0; i < rays.length; i++) {
@@ -235,18 +262,22 @@ export default function BrandStatementSection({
         const x2 = xMid + cosA * halfLen;
         const y2 = yMid + sinA * halfLen;
 
-        // Smooth edge fade-out so rays naturally extinguish before the viewport edges
-        const fadeMargin = 75;
-        const fadeTop = Math.min(1, Math.max(0, yMid / fadeMargin));
-        const fadeBottom = Math.min(1, Math.max(0, (height - yMid) / fadeMargin));
-        const fadeLeft = Math.min(1, Math.max(0, xMid / fadeMargin));
-        const fadeRight = Math.min(1, Math.max(0, (width - xMid) / fadeMargin));
+        // Smooth edge fade-out: ensures ray tips naturally extinguish before touching viewport edges
+        const fadeMargin = 85;
+        const extentX = Math.abs(cosA) * halfLen;
+        const extentY = Math.abs(sinA) * halfLen;
+
+        const fadeTop = Math.min(1, Math.max(0, (yMid - extentY) / fadeMargin));
+        const fadeBottom = Math.min(1, Math.max(0, (height - (yMid + extentY)) / fadeMargin));
+        const fadeLeft = Math.min(1, Math.max(0, (xMid - extentX) / fadeMargin));
+        const fadeRight = Math.min(1, Math.max(0, (width - (xMid + extentX)) / fadeMargin));
         const edgeFade = fadeTop * fadeBottom * fadeLeft * fadeRight;
 
         // Smooth sine opacity envelope: 0 at start -> 1 at middle -> 0 at end
         const alpha = Math.sin(progress * Math.PI) * ray.alphaMax * edgeFade;
 
-        if (alpha > 0.01) {
+        // Strict bounds test: never draw outside logical canvas area
+        if (alpha > 0.01 && x2 > 0 && x1 < width && y2 > 0 && y1 < height) {
           ctx.beginPath();
           ctx.moveTo(x1, y1);
           ctx.lineTo(x2, y2);
@@ -264,7 +295,8 @@ export default function BrandStatementSection({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("resize", resizeCanvas);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateSize);
     };
   }, [prefersReducedMotion]);
 
@@ -437,7 +469,7 @@ export default function BrandStatementSection({
         >
           <h2
             style={{
-              fontSize: "clamp(4.0rem, 11.5vw, 10.5rem)",
+              fontSize: "clamp(3.2rem, 9.2vw, 8.5rem)",
               color: BRAND_RED,
             }}
             className="m-0 font-black uppercase text-center tracking-tight font-[family-name:var(--font-bebas),var(--font-outfit),Impact,sans-serif] flex flex-col items-center justify-center"
