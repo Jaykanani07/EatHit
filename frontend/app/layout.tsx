@@ -48,6 +48,18 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable} ${bebasNeue.variable} h-full`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="relative min-h-full bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white">
         <Header />
         {children}

@@ -1,5 +1,6 @@
 import TheCrunchOfIndiaHero from "./components/TheCrunchOfIndiaHero";
 import BrandStatementSection from "./components/BrandStatementSection";
+import ShareTheCrunchSection from "./components/ShareTheCrunchSection";
 
 export default function Home() {
   return (
@@ -11,6 +12,9 @@ export default function Home() {
 
       {/* 2. Second Section: BAVET-Inspired Brand Statement with Dynamic Scroll Effect */}
       <BrandStatementSection />
+
+      {/* 3. Third Section: Share The Crunch (Bavet-inspired Khakhra Plates & Stacked Typography) */}
+      <ShareTheCrunchSection />
     </main>
   );
 }

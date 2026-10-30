@@ -263,14 +263,15 @@ export default function BrandStatementSection({
         const y2 = yMid + sinA * halfLen;
 
         // Smooth edge fade-out: ensures ray tips naturally extinguish before touching viewport edges
-        const fadeMargin = 85;
+        const fadeMarginX = 90;
+        const fadeMarginY = Math.max(140, height * 0.2);
         const extentX = Math.abs(cosA) * halfLen;
         const extentY = Math.abs(sinA) * halfLen;
 
-        const fadeTop = Math.min(1, Math.max(0, (yMid - extentY) / fadeMargin));
-        const fadeBottom = Math.min(1, Math.max(0, (height - (yMid + extentY)) / fadeMargin));
-        const fadeLeft = Math.min(1, Math.max(0, (xMid - extentX) / fadeMargin));
-        const fadeRight = Math.min(1, Math.max(0, (width - (xMid + extentX)) / fadeMargin));
+        const fadeTop = Math.min(1, Math.max(0, (yMid - extentY) / fadeMarginY));
+        const fadeBottom = Math.min(1, Math.max(0, (height - (yMid + extentY)) / fadeMarginY));
+        const fadeLeft = Math.min(1, Math.max(0, (xMid - extentX) / fadeMarginX));
+        const fadeRight = Math.min(1, Math.max(0, (width - (xMid + extentX)) / fadeMarginX));
         const edgeFade = fadeTop * fadeBottom * fadeLeft * fadeRight;
 
         // Smooth sine opacity envelope: 0 at start -> 1 at middle -> 0 at end
@@ -437,6 +438,10 @@ export default function BrandStatementSection({
         style={{
           background:
             "radial-gradient(circle, rgba(217, 119, 6, 0.16) 0%, rgba(195, 49, 48, 0.08) 45%, transparent 70%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
         }}
       />
 
@@ -444,7 +449,31 @@ export default function BrandStatementSection({
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-[1]"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
+        }}
         aria-hidden="true"
+      />
+
+      {/* Top seamless transition gradient from Hero into pure #F2F0E6 */}
+      <div
+        className="absolute top-0 left-0 right-0 h-32 sm:h-48 pointer-events-none select-none z-[5]"
+        style={{
+          background:
+            "linear-gradient(to bottom, #F2F0E6 0%, rgba(242, 240, 230, 0.5) 45%, rgba(242, 240, 230, 0) 100%)",
+        }}
+      />
+
+      {/* Bottom seamless transition gradient into Section 3 (#F2F0E6) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 sm:h-48 pointer-events-none select-none z-[5]"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(242, 240, 230, 0) 0%, rgba(242, 240, 230, 0.5) 55%, #F2F0E6 100%)",
+        }}
       />
 
       {/* ========================================================= */}

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --font-teko: 'Teko', system-ui, sans-serif;
   --bg-parchment: #FBF8F3;
   --bg-parchment-subtle: #F3ECE2;
   --text-dark: #19120D;
@@ -14,11 +15,16 @@
   --font-outfit: var(--font-outfit), system-ui, -apple-system, sans-serif;
   --font-jakarta: var(--font-jakarta), system-ui, -apple-system, sans-serif;
   --font-bebas: var(--font-bebas), "Bebas Neue", var(--font-outfit), Impact, "Arial Narrow", sans-serif;
+  --font-teko: var(--font-teko), "Teko", var(--font-bebas), Impact, sans-serif;
   --color-parchment: #FBF8F3;
   --color-parchment-subtle: #F3ECE2;
   --color-brand-red: #DC2626;
   --color-brand-terracotta: #C2410C;
   --color-brand-dark: #19120D;
+}
+
+.font-teko {
+  font-family: var(--font-teko), "Teko", var(--font-bebas), Impact, sans-serif;
 }
 
 html {
@@ -56,14 +62,29 @@ body {
 
 /* Bavet-style Kinetic Stroke Outline */
 .text-outline-brand {
-  -webkit-text-stroke: 2px currentColor;
+  -webkit-text-stroke: 2px #C33130;
   color: transparent;
   transition: all 0.3s ease;
 }
 
 .text-outline-brand-thick {
-  -webkit-text-stroke: 3px currentColor;
+  -webkit-text-stroke: 3px #C33130;
   color: transparent;
+}
+
+.text-outline-editorial {
+  -webkit-text-stroke: 2.6px #B72E32;
+  color: transparent;
+  paint-order: stroke fill;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Animations */
