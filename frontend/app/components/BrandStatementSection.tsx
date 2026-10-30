@@ -83,6 +83,29 @@ function ArchedLine({ text, isTopLine }: ArchedLineProps) {
   );
 }
 
+interface RibbonSegmentProps {
+  outlineText: string;
+  solidText: string;
+}
+
+function RibbonSegment({ outlineText, solidText }: RibbonSegmentProps) {
+  return (
+    <span className="inline-flex items-center gap-5 sm:gap-7 font-black text-6xl sm:text-8xl lg:text-[10rem] tracking-wide uppercase font-[family-name:var(--font-bebas)] leading-none">
+      <span
+        className="text-transparent"
+        style={{
+          WebkitTextStroke: "1.5px #C33130",
+        }}
+      >
+        {outlineText}
+      </span>
+      <span className="text-[#C33130] text-[0.4em]">•</span>
+      <span className="text-[#C33130]">{solidText}</span>
+      <span className="text-[#C33130] text-[0.4em]">•</span>
+    </span>
+  );
+}
+
 interface BrandStatementSectionProps {
   copy?: Partial<BrandStatementConfig>;
   className?: string;
@@ -391,7 +414,7 @@ export default function BrandStatementSection({
       {/* Adds rich living rhythm and eliminates empty negative space */}
       {/* ========================================================= */}
       <div
-        className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 flex items-center justify-center opacity-[0.055]"
+        className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 flex items-center justify-center opacity-[0.045]"
         style={{
           maskImage:
             "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
@@ -399,51 +422,57 @@ export default function BrandStatementSection({
             "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
         }}
       >
-        <div className="w-[145vw] -rotate-[7deg] flex flex-col gap-6 sm:gap-10 text-[#B72E32]">
+        <div className="w-[160vw] -rotate-[7deg] flex flex-col gap-6 sm:gap-10">
           {/* Row 1: Leftward Infinite Scroll */}
-          <div className="animate-marquee-left whitespace-nowrap flex items-center gap-8">
-            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
-              EATHIT KHAKHRA • 100% ROASTED ON TAWA • NEVER DEEP FRIED • STONE-GROUND WHOLE WHEAT •
-            </span>
-            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
-              EATHIT KHAKHRA • 100% ROASTED ON TAWA • NEVER DEEP FRIED • STONE-GROUND WHOLE WHEAT •
-            </span>
+          <div className="animate-marquee-left whitespace-nowrap flex items-center">
+            <div className="flex items-center gap-5 sm:gap-7 shrink-0 pr-5 sm:pr-7">
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+            </div>
+            <div className="flex items-center gap-5 sm:gap-7 shrink-0 pr-5 sm:pr-7" aria-hidden="true">
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+            </div>
           </div>
 
-          {/* Row 2: Rightward Infinite Scroll (Hollow Outline Stroke) */}
-          <div className="animate-marquee-right whitespace-nowrap flex items-center gap-8 text-outline-brand-thick">
-            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
-              THE CRUNCH OF INDIA • AUTHENTIC GUJARATI HERITAGE • CRISPY EVERYDAY GOODNESS •
-            </span>
-            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
-              THE CRUNCH OF INDIA • AUTHENTIC GUJARATI HERITAGE • CRISPY EVERYDAY GOODNESS •
-            </span>
+          {/* Row 2: Rightward Infinite Scroll */}
+          <div className="animate-marquee-right whitespace-nowrap flex items-center">
+            <div className="flex items-center gap-5 sm:gap-7 shrink-0 pr-5 sm:pr-7">
+              <RibbonSegment outlineText="THE CRUNCH OF INDIA" solidText="EATHIT" />
+              <RibbonSegment outlineText="100% ROASTED" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="THE CRUNCH OF INDIA" solidText="EATHIT" />
+            </div>
+            <div className="flex items-center gap-5 sm:gap-7 shrink-0 pr-5 sm:pr-7" aria-hidden="true">
+              <RibbonSegment outlineText="THE CRUNCH OF INDIA" solidText="EATHIT" />
+              <RibbonSegment outlineText="100% ROASTED" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="THE CRUNCH OF INDIA" solidText="EATHIT" />
+            </div>
           </div>
 
           {/* Row 3: Leftward Infinite Scroll */}
-          <div className="animate-marquee-left whitespace-nowrap flex items-center gap-8">
-            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
-              ZERO TRANS FAT • PURE ROCK SALT • KASURI METHI • ROASTED JEERA • REAL SPICES •
-            </span>
-            <span className="font-black text-6xl sm:text-8xl lg:text-[9.5rem] tracking-tighter uppercase font-[family-name:var(--font-outfit)] leading-none">
-              ZERO TRANS FAT • PURE ROCK SALT • KASURI METHI • ROASTED JEERA • REAL SPICES •
-            </span>
+          <div className="animate-marquee-left whitespace-nowrap flex items-center">
+            <div className="flex items-center gap-5 sm:gap-7 shrink-0 pr-5 sm:pr-7">
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="AUTHENTIC KHAKHRA" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="AUTHENTIC KHAKHRA" solidText="EATHIT" />
+            </div>
+            <div className="flex items-center gap-5 sm:gap-7 shrink-0 pr-5 sm:pr-7" aria-hidden="true">
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="AUTHENTIC KHAKHRA" solidText="EATHIT" />
+              <RibbonSegment outlineText="MADE FOR FRIENDS" solidText="EATHIT" />
+              <RibbonSegment outlineText="AUTHENTIC KHAKHRA" solidText="EATHIT" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Warm Ambient Radial Tawa Glow behind center */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[750px] h-[600px] sm:h-[750px] rounded-full blur-[140px] pointer-events-none z-0"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(217, 119, 6, 0.16) 0%, rgba(195, 49, 48, 0.08) 45%, transparent 70%)",
-          maskImage:
-            "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
-        }}
-      />
 
       {/* Continuous Radiating Rays Canvas spanning the full section */}
       <canvas
