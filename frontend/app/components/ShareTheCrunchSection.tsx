@@ -1,601 +1,520 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
-import { MoveRight } from "lucide-react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+} from "framer-motion";
 
 // ============================================================================
-// STEP 2: CONTENT CONFIG
-// All copy and assets in one place for 1-line changes
+// 1. APPROVED FLAVOUR PLATES & EDITORIAL CONTENT
 // ============================================================================
-export const COPY = {
-  headline: [
-    "CHAI IN ONE HAND,",
-    "KHAKHRA IN THE OTHER.",
-    "THAT'S THE EAT HIT WAY.",
-  ],
-  sub: "Big flavours. Light bites. Endless crunch.",
-  cta: "SEE OUR FULL MENU",
-  hoverLabel: ["HOVER ME", "BABY"],
-};
 
-export const PLATES = [
-  // x, y, d are px at a 1280px design width; rot in degrees
+export interface FlavourPlateItem {
+  id: string;
+  num: string;
+  name: string;
+  gujarati: string;
+  title: string; // Exact approved heading
+  desc: string; // Exact approved description
+  image: string;
+  alt: string;
+  tag: string;
+  accent: string;
+  spiceLevel: number;
+  bestFor: string;
+}
+
+export const FLAVOUR_PLATES: FlavourPlateItem[] = [
   {
-    id: "jeera-1",
-    name: "Jeera Khakhra",
-    src: "/images/products/jeera-khakhra.png",
-    x: 58,
-    y: 342,
-    d: 278,
-    rot: -6,
-  },
-  {
-    id: "masala-1",
+    id: "masala",
+    num: "01",
     name: "Masala Khakhra",
-    src: "/images/products/masala-khakhra.png",
-    x: 944,
-    y: 242,
-    d: 278,
-    rot: 8,
+    gujarati: "મસાલા ખાખરા",
+    title: "THE SPICY CRUNCH",
+    desc: "Big spice. Bigger crunch.",
+    image: "/images/story-plates/masala-plate.png",
+    alt: "Masala Khakhra on ceramic plate — The Spicy Crunch",
+    tag: "SPICY & BOLD",
+    accent: "#C33130",
+    spiceLevel: 3,
+    bestFor: "Afternoon Chai & Masala Chai Breaks",
   },
   {
-    id: "methi-1",
+    id: "methi",
+    num: "02",
     name: "Methi Khakhra",
-    src: "/images/products/methi-khakhra.png",
-    x: 906,
-    y: 609,
-    d: 276,
-    rot: -4,
+    gujarati: "મેથી ખાખરા",
+    title: "THE HERBAL CRUNCH",
+    desc: "Earthy, herby and unmistakably Gujarati.",
+    image: "/images/story-plates/methi-plate.png",
+    alt: "Methi Khakhra on ceramic plate — The Herbal Crunch",
+    tag: "HERBAL CLASSIC",
+    accent: "#2E7D32",
+    spiceLevel: 1,
+    bestFor: "Morning Breakfast & Light Snacking",
   },
   {
-    id: "lasan-1",
-    name: "Lasan Khakhra",
-    src: "/images/products/lasan-khakhra.png",
-    x: -55,
-    y: 702,
-    d: 275,
-    rot: 5,
-  },
-  {
-    id: "plain-1",
-    name: "Plain Khakhra",
-    src: "/images/products/plain-khakhra.png",
-    x: 307,
-    y: 862,
-    d: 278,
-    rot: -3,
-  },
-  {
-    id: "jeera-2",
+    id: "jeera",
+    num: "03",
     name: "Jeera Khakhra",
-    src: "/images/products/jeera-khakhra.png",
-    x: 1128,
-    y: 922,
-    d: 275,
-    rot: 7,
+    gujarati: "જીરા ખાખરા",
+    title: "THE AROMATIC CRUNCH",
+    desc: "A little cumin. A lot of character.",
+    image: "/images/story-plates/jeera-plate.png",
+    alt: "Jeera Khakhra on ceramic plate — The Aromatic Crunch",
+    tag: "TOASTED CUMIN",
+    accent: "#D97706",
+    spiceLevel: 1,
+    bestFor: "Digestive Bite & Evening Tea",
+  },
+  {
+    id: "lasan",
+    num: "04",
+    name: "Lasan Khakhra",
+    gujarati: "લસણ ખાખરા",
+    title: "THE GARLIC CRUNCH",
+    desc: "A bold garlic hit in every bite.",
+    image: "/images/story-plates/lasan-plate.png",
+    alt: "Lasan Khakhra on ceramic plate — The Garlic Crunch",
+    tag: "ROASTED GARLIC",
+    accent: "#C2410C",
+    spiceLevel: 2,
+    bestFor: "Party Nibbles & Savory Cravings",
+  },
+  {
+    id: "plain",
+    num: "05",
+    name: "Plain Khakhra",
+    gujarati: "સાદા ખાખરા",
+    title: "THE CLASSIC",
+    desc: "Pure, simple and timeless.",
+    image: "/images/story-plates/plain-plate.png",
+    alt: "Plain Khakhra on ceramic plate — The Classic",
+    tag: "TIMELESS HERITAGE",
+    accent: "#8C4A28",
+    spiceLevel: 0,
+    bestFor: "Pickle Pairing & All-Day Snacking",
   },
 ];
 
 // ============================================================================
-// SCALLOPED RIM SVG PATH GENERATOR
-// r(theta) = R + 3 * sin(14 * theta), sampled at 180 points
+// 2. MAIN SECTION COMPONENT: SHARE THE CRUNCH SECTION (SECTION 3)
 // ============================================================================
-function generateScallopedPath(
-  cx: number,
-  cy: number,
-  R: number,
-  A: number,
-  frequency: number,
-  points = 180
-): string {
-  let path = "";
-  for (let i = 0; i < points; i++) {
-    const theta = (i / points) * 2 * Math.PI;
-    const r = R + A * Math.sin(frequency * theta);
-    const x = (cx + r * Math.cos(theta)).toFixed(2);
-    const y = (cy + r * Math.sin(theta)).toFixed(2);
-    path += (i === 0 ? "M" : "L") + " " + x + " " + y + " ";
-  }
-  return path + "Z";
-}
 
-// 300x300 viewBox: center=(150, 150), radius=142, scalloped amplitude=3, 14 lobes
-const SCALLOPED_RIM_PATH = generateScallopedPath(150, 150, 142, 3, 14, 180);
-
-
-// ============================================================================
-// MAIN COMPONENT: SHARE THE CRUNCH SECTION (SECTION 3)
-// ============================================================================
 export default function ShareTheCrunchSection() {
+  const containerRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const [hoveredPlateIndex, setHoveredPlateIndex] = useState<number | null>(null);
-  const [label1Hovered, setLabel1Hovered] = useState(false);
-  const [label2Hovered, setLabel2Hovered] = useState(false);
 
-  // Label 1 points to plate 0; Label 2 points to plate 2 and 5
-  const isLabel1Active = hoveredPlateIndex === 0 || label1Hovered;
-  const isLabel2Active =
-    hoveredPlateIndex === 2 || hoveredPlateIndex === 5 || label2Hovered;
+  // Screen size detection
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Shared normalized scroll progress driving all 3 stages and 5 plates
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // ==========================================================================
+  // STAGE 1: INTRODUCTORY HEADLINE (Progress 0.0 -> 0.22)
+  // Displayed at start; fades out completely before Stage 2
+  // ==========================================================================
+  const introOpacity = useTransform(scrollYProgress, [0, 0.12, 0.20], [1, 0.75, 0]);
+  const introY = useTransform(
+    scrollYProgress,
+    [0, 0.20],
+    prefersReducedMotion ? [0, 0] : [0, -90]
+  );
+  const introScale = useTransform(
+    scrollYProgress,
+    [0, 0.20],
+    prefersReducedMotion ? [1, 1] : [1, 0.94]
+  );
+  const introDisplay = useTransform(scrollYProgress, (v) => (v < 0.22 ? "flex" : "none"));
+
+  // ==========================================================================
+  // STAGE 2: CENTRAL EDITORIAL HEADLINE (Progress 0.20 -> 0.78)
+  // Outlined "THE ULTIMATE" + Solid "CRUNCH"
+  // Cleanly hidden during Stage 1 (< 0.18) and Stage 3 (> 0.82)
+  // ==========================================================================
+  const headlineOpacity = useTransform(
+    scrollYProgress,
+    [0.18, 0.26, 0.72, 0.80],
+    [0, 1, 1, 0]
+  );
+  const headlineScale = useTransform(
+    scrollYProgress,
+    [0.18, 0.26, 0.72, 0.80],
+    prefersReducedMotion ? [1, 1, 1, 1] : [0.88, 1, 1, 1.05]
+  );
+  const headlineY = useTransform(
+    scrollYProgress,
+    [0.18, 0.26, 0.72, 0.80],
+    prefersReducedMotion ? [0, 0, 0, 0] : [50, 0, 0, -40]
+  );
+  const headlineDisplay = useTransform(scrollYProgress, (v) =>
+    v >= 0.18 && v <= 0.82 ? "flex" : "none"
+  );
+
+  // ==========================================================================
+  // STAGE 3: FINAL FLAVOUR CTA (Progress 0.76 -> 1.0)
+  // FIND YOUR CRUNCH. / SEE ALL FLAVOURS →
+  // Cleanly hidden until scroll reaches 0.74
+  // ==========================================================================
+  const ctaOpacity = useTransform(scrollYProgress, [0.76, 0.84, 1.0], [0, 1, 1]);
+  const ctaScale = useTransform(
+    scrollYProgress,
+    [0.76, 0.84, 1.0],
+    prefersReducedMotion ? [1, 1, 1] : [0.92, 1, 1]
+  );
+  const ctaY = useTransform(
+    scrollYProgress,
+    [0.76, 0.84, 1.0],
+    prefersReducedMotion ? [0, 0, 0] : [40, 0, 0]
+  );
+  const ctaDisplay = useTransform(scrollYProgress, (v) => (v >= 0.74 ? "flex" : "none"));
+
+  // ==========================================================================
+  // 5 PLATES CHOREOGRAPHY: CURVED SCROLL PATHS & INDEPENDENT ROTATION
+  // Reverses seamlessly when scrolling backwards. Stops when scroll stops.
+  // ==========================================================================
+
+  // Plate 1: Masala Khakhra (Top-Left)
+  const plate1X = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["-32vw", "-26vw", "-22vw", "-24vw", "-30vw"]
+      : isTablet
+      ? ["-36vw", "-30vw", "-26vw", "-28vw", "-34vw"]
+      : ["-42vw", "-34vw", "-29vw", "-32vw", "-38vw"]
+  );
+  const plate1Y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["-14vh", "-24vh", "-20vh", "-24vh", "-28vh"]
+      : ["-10vh", "-23vh", "-19vh", "-24vh", "-30vh"]
+  );
+  const plate1Rotate = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [0, 0, 0, 0, 0] : isMobile ? [-14, -6, 4, 12, 18] : [-24, -10, 8, 22, 34]
+  );
+  const plate1Scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.85, 0.98, 1.05, 1.0, 0.9]
+  );
+  const plate1Opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.85, 1, 1, 1, 0.8]
+  );
+
+  // Plate 2: Methi Khakhra (Top-Right)
+  const plate2X = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["34vw", "26vw", "22vw", "26vw", "32vw"]
+      : isTablet
+      ? ["38vw", "30vw", "26vw", "30vw", "36vw"]
+      : ["44vw", "34vw", "28vw", "33vw", "40vw"]
+  );
+  const plate2Y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["-24vh", "-22vh", "-18vh", "-20vh", "-26vh"]
+      : ["-28vh", "-23vh", "-18vh", "-22vh", "-27vh"]
+  );
+  const plate2Rotate = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [0, 0, 0, 0, 0] : isMobile ? [16, 8, -4, -10, -18] : [30, 14, -8, -20, -32]
+  );
+  const plate2Scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.78, 0.96, 1.04, 0.98, 0.88]
+  );
+  const plate2Opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.45, 1, 1, 1, 0.8]
+  );
+
+  // Plate 3: Jeera Khakhra (Mid/Far-Right)
+  const plate3X = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["36vw", "30vw", "26vw", "24vw", "30vw"]
+      : isTablet
+      ? ["40vw", "34vw", "30vw", "28vw", "34vw"]
+      : ["46vw", "38vw", "33vw", "31vw", "37vw"]
+  );
+  const plate3Y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["6vh", "4vh", "10vh", "16vh", "22vh"]
+      : ["8vh", "6vh", "13vh", "21vh", "26vh"]
+  );
+  const plate3Rotate = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [0, 0, 0, 0, 0] : isMobile ? [-10, 2, 10, 18, 24] : [-16, 2, 18, 32, 44]
+  );
+  const plate3Scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.8, 0.95, 1.02, 0.98, 0.9]
+  );
+  const plate3Opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.65, 1, 1, 1, 0.8]
+  );
+
+  // Plate 4: Lasan Khakhra (Bottom-Center / Lower-Right)
+  const plate4X = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["10vw", "6vw", "2vw", "-2vw", "0vw"]
+      : isTablet
+      ? ["10vw", "6vw", "3vw", "-2vw", "0vw"]
+      : ["12vw", "8vw", "4vw", "-2vw", "0vw"]
+  );
+  const plate4Y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["38vh", "30vh", "24vh", "26vh", "30vh"]
+      : ["46vh", "34vh", "26vh", "28vh", "33vh"]
+  );
+  const plate4Rotate = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [0, 0, 0, 0, 0] : isMobile ? [12, 4, -6, -14, -20] : [20, 8, -10, -22, -34]
+  );
+  const plate4Scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.72, 0.94, 1.04, 0.98, 0.9]
+  );
+  const plate4Opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.4, 1, 1, 1, 0.85]
+  );
+
+  // Plate 5: Plain Khakhra (Bottom-Left)
+  const plate5X = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["-34vw", "-28vw", "-24vw", "-22vw", "-28vw"]
+      : isTablet
+      ? ["-38vw", "-32vw", "-27vw", "-25vw", "-32vw"]
+      : ["-42vw", "-34vw", "-29vw", "-27vw", "-35vw"]
+  );
+  const plate5Y = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    isMobile
+      ? ["24vh", "18vh", "14vh", "20vh", "24vh"]
+      : ["28vh", "20vh", "15vh", "23vh", "27vh"]
+  );
+  const plate5Rotate = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [0, 0, 0, 0, 0] : isMobile ? [-12, -2, 8, 16, 22] : [-18, -4, 14, 26, 38]
+  );
+  const plate5Scale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.8, 0.96, 1.02, 0.98, 0.9]
+  );
+  const plate5Opacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.7, 1, 1, 1, 0.8]
+  );
+
+  const plateTransforms = [
+    { x: plate1X, y: plate1Y, rotate: plate1Rotate, scale: plate1Scale, opacity: plate1Opacity },
+    { x: plate2X, y: plate2Y, rotate: plate2Rotate, scale: plate2Scale, opacity: plate2Opacity },
+    { x: plate3X, y: plate3Y, rotate: plate3Rotate, scale: plate3Scale, opacity: plate3Opacity },
+    { x: plate4X, y: plate4Y, rotate: plate4Rotate, scale: plate4Scale, opacity: plate4Opacity },
+    { x: plate5X, y: plate5Y, rotate: plate5Rotate, scale: plate5Scale, opacity: plate5Opacity },
+  ];
 
   return (
     <section
+      ref={containerRef}
       id="share-the-crunch"
       aria-label="Chai in one hand, Khakhra in the other. That's the Eat Hit way."
-      className="relative w-full bg-[#F2F0E6] overflow-x-clip select-none share-the-crunch-root"
+      className="relative w-full bg-[#F2F0E6] overflow-x-clip select-none h-[280svh] md:h-[320svh]"
     >
-      {/* Dynamic Responsive Styles for 1280px Coordinate Scaling */}
-      <style jsx>{`
-        .share-the-crunch-root {
-          height: 195vw;
-          min-height: 820px;
-        }
-
-        /* Responsive Plate Coordinates */
-        /* Mobile: scaled down to ~43-45vw with edge cropping */
-        .plate-box-0 {
-          left: -10vw;
-          top: 36vw;
-          width: 44vw;
-          height: 44vw;
-        }
-        .plate-box-1 {
-          left: 66vw;
-          top: 28vw;
-          width: 44vw;
-          height: 44vw;
-        }
-        .plate-box-2 {
-          left: 64vw;
-          top: 72vw;
-          width: 43vw;
-          height: 43vw;
-        }
-        .plate-box-3 {
-          left: -12vw;
-          top: 86vw;
-          width: 43vw;
-          height: 43vw;
-        }
-        .plate-box-4 {
-          left: 28vw;
-          top: 108vw;
-          width: 44vw;
-          height: 44vw;
-        }
-        .plate-box-5 {
-          left: 68vw;
-          top: 126vw;
-          width: 43vw;
-          height: 43vw;
-        }
-
-        /* Mobile Label Coordinates */
-        .hover-label-1 {
-          left: 6vw;
-          top: 24vw;
-        }
-        .hover-label-2 {
-          display: none;
-        }
-
-        /* Mobile Headline & Paragraph */
-        .headline-wrapper {
-          top: 6vw;
-          max-width: 90vw;
-        }
-        .headline-text {
-          font-size: 10.5vw;
-          line-height: 0.94;
-        }
-        .paragraph-text {
-          font-size: clamp(14px, 3.8vw, 17px);
-          max-width: 82vw;
-        }
-
-        /* Mobile Button */
-        .cta-button-wrapper {
-          top: 174vw;
-        }
-
-        /* Desktop (768px+): exact match to 1280px design formula (value / 12.8 + "vw") */
-        @media (min-width: 768px) {
-          .share-the-crunch-root {
-            height: calc(1341 / 12.8 * 1vw);
-            min-height: 105vw;
-          }
-
-          /* Desktop Plate Positions: x / 12.8 vw, y / 12.8 vw, d / 12.8 vw */
-          .plate-box-0 {
-            left: calc(58 / 12.8 * 1vw);
-            top: calc(342 / 12.8 * 1vw);
-            width: calc(278 / 12.8 * 1vw);
-            height: calc(278 / 12.8 * 1vw);
-          }
-          .plate-box-1 {
-            left: calc(944 / 12.8 * 1vw);
-            top: calc(242 / 12.8 * 1vw);
-            width: calc(278 / 12.8 * 1vw);
-            height: calc(278 / 12.8 * 1vw);
-          }
-          .plate-box-2 {
-            left: calc(906 / 12.8 * 1vw);
-            top: calc(609 / 12.8 * 1vw);
-            width: calc(276 / 12.8 * 1vw);
-            height: calc(276 / 12.8 * 1vw);
-          }
-          .plate-box-3 {
-            left: calc(-55 / 12.8 * 1vw);
-            top: calc(702 / 12.8 * 1vw);
-            width: calc(275 / 12.8 * 1vw);
-            height: calc(275 / 12.8 * 1vw);
-          }
-          .plate-box-4 {
-            left: calc(307 / 12.8 * 1vw);
-            top: calc(862 / 12.8 * 1vw);
-            width: calc(278 / 12.8 * 1vw);
-            height: calc(278 / 12.8 * 1vw);
-          }
-          .plate-box-5 {
-            left: calc(1128 / 12.8 * 1vw);
-            top: calc(922 / 12.8 * 1vw);
-            width: calc(275 / 12.8 * 1vw);
-            height: calc(275 / 12.8 * 1vw);
-          }
-
-          /* Desktop Hover Labels: 1 at (128, 205), 2 at (935, 897) */
-          .hover-label-1 {
-            left: calc(128 / 12.8 * 1vw);
-            top: calc(205 / 12.8 * 1vw);
-          }
-          .hover-label-2 {
-            display: block;
-            left: calc(935 / 12.8 * 1vw);
-            top: calc(897 / 12.8 * 1vw);
-          }
-
-          /* Desktop Headline & Paragraph */
-          .headline-wrapper {
-            top: 10vw;
-            max-width: 80vw;
-          }
-          .headline-text {
-            font-size: 5.6vw;
-            line-height: 0.92;
-          }
-          .paragraph-text {
-            font-size: clamp(16px, 1.25vw, 20px);
-            max-width: 48vw;
-          }
-
-          /* Desktop Button */
-          .cta-button-wrapper {
-            top: calc(1228 / 12.8 * 1vw);
-          }
-        }
-      `}</style>
-
-      {/* ========================================================= */}
-      {/* STEP 4: HEADLINE REVEAL AND PARAGRAPH                     */}
-      {/* ========================================================= */}
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.15 }}
-        className="headline-wrapper absolute left-1/2 -translate-x-1/2 w-full text-center z-20 flex flex-col items-center top-[6vw] md:top-[10vw] max-w-[90vw] md:max-w-[80vw]"
-      >
-        <h2 className="headline-text font-black uppercase text-[#C33130] font-[family-name:var(--font-bebas)] tracking-tight text-center m-0">
-          {COPY.headline.map((line, index) => (
-            <span key={index} className="block overflow-hidden py-0.5">
-              <motion.span
-                className="block whitespace-nowrap"
-                variants={{
-                  hidden: prefersReducedMotion
-                    ? { opacity: 0 }
-                    : { y: "105%", opacity: 1 },
-                  visible: {
-                    y: "0%",
-                    opacity: 1,
-                    transition: {
-                      duration: 0.8,
-                      delay: prefersReducedMotion ? 0 : index * 0.12,
-                      ease: [0.22, 1, 0.36, 1],
-                    },
-                  },
-                }}
-              >
-                {line}
-              </motion.span>
-            </span>
-          ))}
-        </h2>
-
-        {/* Small Paragraph in Teko 500, uppercase */}
-        <motion.p
-          variants={{
-            hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 12 },
-            visible: {
-              opacity: 1,
-              y: 0,
-              transition: {
-                duration: 0.7,
-                delay: prefersReducedMotion ? 0 : 0.38,
-                ease: [0.22, 1, 0.36, 1],
-              },
-            },
+      {/* ==================================================================== */}
+      {/* STICKY 100svh INNER STAGE                                            */}
+      {/* ==================================================================== */}
+      <div className="sticky top-0 h-[100svh] w-full overflow-x-clip flex flex-col items-center justify-center pointer-events-auto">
+        {/* Subtle authentic paper grain texture overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.035] mix-blend-multiply"
+          style={{
+            backgroundImage: `radial-gradient(#19120D 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
           }}
-          className="paragraph-text font-teko font-medium uppercase text-[#C33130] leading-[1.1] tracking-wide text-center mx-auto mt-4 sm:mt-5"
+          aria-hidden="true"
+        />
+
+        {/* ================================================================== */}
+        {/* STAGE 1: INTRODUCTORY HEADLINE & COPY (Scrolls up & fades cleanly) */}
+        {/* ================================================================== */}
+        <motion.div
+          style={{
+            y: introY,
+            opacity: introOpacity,
+            scale: introScale,
+            display: introDisplay,
+          }}
+          className="absolute inset-0 flex flex-col items-center justify-center text-center z-25 px-4 max-w-5xl mx-auto"
         >
-          {COPY.sub}
-        </motion.p>
-      </motion.div>
-
-      {/* ========================================================= */}
-      {/* STEP 6: "HOVER ME BABY" LABELS                            */}
-      {/* ========================================================= */}
-      {/* Label 1: Down Arrow at (128, 205) */}
-      <div
-        className="hover-label-1 absolute z-25 pointer-events-auto cursor-pointer select-none"
-        onMouseEnter={() => setLabel1Hovered(true)}
-        onMouseLeave={() => setLabel1Hovered(false)}
-        aria-hidden="true"
-      >
-        <div className="relative flex flex-col items-start">
-          {/* Tilted 2-line Text */}
-          <div
-            className="font-teko font-semibold uppercase text-[#C33130] tracking-wider leading-[0.88] text-[20px] sm:text-[23px]"
-            style={{
-              transform: "rotate(-8deg)",
-              transformOrigin: "left center",
-            }}
-          >
-            <div>{COPY.hoverLabel[0]}</div>
-            <div>{COPY.hoverLabel[1]}</div>
+          {/* Subtle top radiating burst motif */}
+          <div className="w-16 h-8 sm:w-20 sm:h-10 mb-2 pointer-events-none flex items-center justify-center text-[#C33130] opacity-80">
+            <svg viewBox="0 0 100 45" fill="none" className="w-full h-full">
+              <line x1="20" y1="40" x2="30" y2="25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <line x1="38" y1="35" x2="44" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <line x1="50" y1="32" x2="50" y2="8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+              <line x1="62" y1="35" x2="56" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <line x1="80" y1="40" x2="70" y2="25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </div>
 
-          {/* Inline SVG with Down Arrow outline + 3 burst ticks */}
-          <motion.svg
-            width="50"
-            height="58"
-            viewBox="0 0 50 58"
-            fill="none"
-            className="ml-6 mt-1.5"
-            animate={{
-              y: isLabel1Active && !prefersReducedMotion ? 4 : 0,
-            }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
-            {/* 3 Short Burst Ticks */}
-            <line
-              x1="9"
-              y1="13"
-              x2="3"
-              y2="8"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="7"
-              y1="22"
-              x2="1"
-              y2="23"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="11"
-              y1="31"
-              x2="5"
-              y2="35"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
+          {/* Exact approved introductory headline */}
+          <h2 className="text-[clamp(2.4rem,6.8vw,6.4rem)] font-black uppercase text-[#C33130] font-[family-name:var(--font-bebas)] tracking-tight leading-[0.92] text-center m-0">
+            <span className="block">CHAI IN ONE HAND,</span>
+            <span className="block mt-0.5 sm:mt-1">KHAKHRA IN THE OTHER.</span>
+            <span className="block mt-0.5 sm:mt-1">THAT&apos;S THE EAT HIT WAY.</span>
+          </h2>
+        </motion.div>
 
-            {/* Curved Arrow Body pointing downwards */}
-            <path
-              d="M 14 16 C 22 24, 30 36, 26 48"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            {/* Arrowhead */}
-            <path
-              d="M 19 43 L 26 50 L 33 43"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </motion.svg>
-        </div>
-      </div>
-
-      {/* Label 2: Up Arrow at (935, 897) */}
-      <div
-        className="hover-label-2 absolute z-25 pointer-events-auto cursor-pointer select-none"
-        onMouseEnter={() => setLabel2Hovered(true)}
-        onMouseLeave={() => setLabel2Hovered(false)}
-        aria-hidden="true"
-      >
-        <div className="relative flex flex-col items-start">
-          {/* Inline SVG with Up Arrow outline + 3 burst ticks */}
-          <motion.svg
-            width="50"
-            height="58"
-            viewBox="0 0 50 58"
-            fill="none"
-            className="ml-4 mb-1"
-            animate={{
-              y: isLabel2Active && !prefersReducedMotion ? -4 : 0,
-            }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
-            {/* 3 Short Burst Ticks */}
-            <line
-              x1="8"
-              y1="14"
-              x2="2"
-              y2="10"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="25"
-              y1="5"
-              x2="25"
-              y2="0"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="41"
-              y1="14"
-              x2="47"
-              y2="10"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-
-            {/* Arrowhead pointing UP */}
-            <path
-              d="M 18 16 L 25 9 L 32 16"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Curved Arrow Body */}
-            <path
-              d="M 25 11 C 28 26, 22 38, 14 48"
-              stroke="#C33130"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </motion.svg>
-
-          {/* Tilted 2-line Text */}
+        {/* ================================================================== */}
+        {/* STAGE 2: CENTRAL EDITORIAL HEADLINE (BAVET OUTLINE + SOLID COMBO)  */}
+        {/* ================================================================== */}
+        <motion.div
+          style={{
+            y: headlineY,
+            opacity: headlineOpacity,
+            scale: headlineScale,
+            display: headlineDisplay,
+          }}
+          className="absolute inset-0 flex flex-col items-center justify-center text-center z-15 px-4 pointer-events-none select-none"
+        >
+          {/* Top Line: OUTLINED RED TEXT (THE ULTIMATE) */}
           <div
-            className="font-teko font-semibold uppercase text-[#C33130] tracking-wider leading-[0.88] text-[20px] sm:text-[23px]"
+            className="font-[family-name:var(--font-bebas)] font-black uppercase tracking-tight leading-[0.84] select-none text-center text-[clamp(3.8rem,11.8vw,11.2rem)]"
             style={{
-              transform: "rotate(-8deg)",
-              transformOrigin: "left center",
+              WebkitTextStroke: "clamp(2px, 0.28vw, 3.8px) #C33130",
+              color: "transparent",
+              letterSpacing: "0.02em",
+              willChange: "transform",
             }}
           >
-            <div>{COPY.hoverLabel[0]}</div>
-            <div>{COPY.hoverLabel[1]}</div>
+            THE ULTIMATE
           </div>
-        </div>
-      </div>
 
-      {/* ========================================================= */}
-      {/* STEP 5: PLATES (Scalloped rim, drop shadow, WebP image)   */}
-      {/* ========================================================= */}
-      {PLATES.map((plate, index) => {
-        return (
+          {/* Bottom Line: SOLID RED TEXT (CRUNCH) */}
           <div
-            key={plate.id + "-" + index}
-            className={`plate-box-${index} absolute z-15`}
+            className="font-[family-name:var(--font-bebas)] font-black uppercase tracking-tight leading-[0.84] text-[#C33130] select-none text-center text-[clamp(3.8rem,11.8vw,11.2rem)] -mt-[0.05em]"
+            style={{
+              letterSpacing: "0.02em",
+              willChange: "transform",
+            }}
           >
+            CRUNCH
+          </div>
+        </motion.div>
+
+        {/* ================================================================== */}
+        {/* STAGE 3: THE 5 REAL KHAKHRA PLATES                                 */}
+        {/* Scroll-choreographed floating plates (pure presentation)           */}
+        {/* ================================================================== */}
+        {FLAVOUR_PLATES.map((plate, index) => {
+          const transforms = plateTransforms[index];
+
+          return (
             <motion.div
-              className="relative w-full h-full cursor-pointer select-none"
+              key={plate.id}
+              id={`plate-${plate.id}`}
               style={{
-                filter: "drop-shadow(0 14px 22px rgba(120, 60, 40, 0.18))",
+                x: transforms.x,
+                y: transforms.y,
+                scale: transforms.scale,
+                opacity: transforms.opacity,
               }}
-              initial={{ rotate: plate.rot, scale: 1 }}
-              animate={{ rotate: plate.rot, scale: 1 }}
-              whileHover={
-                prefersReducedMotion
-                  ? undefined
-                  : {
-                      scale: 1.06,
-                      rotate: plate.rot + 6,
-                      transition: {
-                        type: "spring",
-                        stiffness: 260,
-                        damping: 20,
-                      },
-                    }
-              }
-              onMouseEnter={() => setHoveredPlateIndex(index)}
-              onMouseLeave={() => setHoveredPlateIndex(null)}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[20]"
             >
-              {/* Layer 1: Scalloped Rim SVG */}
-              <svg
-                viewBox="0 0 300 300"
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                aria-hidden="true"
+              {/* Inner Plate Graphic: Rotates with scroll */}
+              <motion.div
+                style={{
+                  rotate: transforms.rotate,
+                  width: "clamp(210px, 22vw, 360px)",
+                  height: "clamp(210px, 22vw, 360px)",
+                  filter: "drop-shadow(0 14px 24px rgba(74, 45, 35, 0.16))",
+                }}
+                className="relative block rounded-full select-none"
               >
-                <defs>
-                  <radialGradient
-                    id={`plate-grad-${index}`}
-                    cx="50%"
-                    cy="50%"
-                    r="50%"
-                  >
-                    <stop offset="0%" stopColor="#FFFFFF" />
-                    <stop offset="80%" stopColor="#FFFFFF" />
-                    <stop offset="100%" stopColor="#E4E8F2" />
-                  </radialGradient>
-                </defs>
-
-                {/* Scalloped Rim with stroke and gradient fill */}
-                <path
-                  d={SCALLOPED_RIM_PATH}
-                  fill={`url(#plate-grad-${index})`}
-                  stroke="rgba(150, 45, 75, 0.7)"
-                  strokeWidth="1.5"
-                />
-
-                {/* Subtle inner concentric plate groove */}
-                <circle
-                  cx="150"
-                  cy="150"
-                  r="108"
-                  fill="none"
-                  stroke="rgba(150, 45, 75, 0.14)"
-                  strokeWidth="1"
-                />
-              </svg>
-
-              {/* Layer 2: Khakhra Image at 72% diameter */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[72%] h-[72%] rounded-full overflow-hidden pointer-events-none flex items-center justify-center">
+                {/* 100% Real Photographic Khakhra on Plate Asset (Clean transparent PNG) */}
                 <Image
-                  src={plate.src}
-                  alt={plate.name}
+                  src={plate.image}
+                  alt={plate.alt}
                   fill
-                  sizes="(max-width: 768px) 45vw, 25vw"
-                  className="object-contain"
-                  priority={index < 2}
+                  sizes="(max-width: 768px) 190px, (max-width: 1200px) 290px, 360px"
+                  className="object-contain pointer-events-none select-none"
+                  priority={index < 3}
                 />
-              </div>
+              </motion.div>
             </motion.div>
-          </div>
-        );
-      })}
+          );
+        })}
 
-
-      {/* ========================================================= */}
-      {/* STEP 7: BUTTON (Teko 500, MoveRight arrow with hover)     */}
-      {/* ========================================================= */}
-      <div className="cta-button-wrapper absolute left-1/2 -translate-x-1/2 z-25 flex items-center justify-center">
-        <a
-          href="#menu"
-          className="group inline-flex items-center justify-center gap-2.5 h-[38px] px-4 rounded-[4px] bg-[#C33130] hover:bg-[#AC2B2A] text-white font-teko font-medium uppercase tracking-wider text-[17px] transition-colors duration-200 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C33130] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F2F0E6] select-none"
+        {/* ================================================================== */}
+        {/* STAGE 4: FINAL FLAVOUR CTA (FIND YOUR CRUNCH.)                     */}
+        {/* ================================================================== */}
+        <motion.div
+          style={{
+            y: ctaY,
+            opacity: ctaOpacity,
+            scale: ctaScale,
+            display: ctaDisplay,
+          }}
+          className="absolute inset-0 flex flex-col items-center justify-center text-center z-30 px-4 select-none"
         >
-          <span>{COPY.cta}</span>
-          <MoveRight
-            className="w-4 h-4 text-white transition-transform duration-200 group-hover:translate-x-1"
-            strokeWidth={1}
-            aria-hidden="true"
-          />
-        </a>
+          {/* Exact approved final CTA headline */}
+          <h3 className="font-[family-name:var(--font-bebas)] font-black uppercase text-[#C33130] tracking-tight leading-[0.88] text-[clamp(3.4rem,9.5vw,8.8rem)] m-0">
+            FIND YOUR CRUNCH.
+          </h3>
+        </motion.div>
       </div>
     </section>
   );
