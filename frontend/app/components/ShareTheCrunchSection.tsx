@@ -8,6 +8,7 @@ import {
   useTransform,
   useReducedMotion,
 } from "framer-motion";
+import BavetWaveText from "./BavetWaveText";
 
 // ============================================================================
 // 1. APPROVED FLAVOUR PLATES & EDITORIAL CONTENT
@@ -198,17 +199,17 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["-32vw", "-26vw", "-22vw", "-24vw", "-30vw"]
+      ? ["-34vw", "-28vw", "-24vw", "-26vw", "-32vw"]
       : isTablet
-      ? ["-36vw", "-30vw", "-26vw", "-28vw", "-34vw"]
-      : ["-42vw", "-34vw", "-29vw", "-32vw", "-38vw"]
+        ? ["-38vw", "-32vw", "-28vw", "-30vw", "-36vw"]
+        : ["-45vw", "-37vw", "-32vw", "-35vw", "-41vw"]
   );
   const plate1Y = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["-14vh", "-24vh", "-20vh", "-24vh", "-28vh"]
-      : ["-10vh", "-23vh", "-19vh", "-24vh", "-30vh"]
+      ? ["-16vh", "-26vh", "-22vh", "-26vh", "-30vh"]
+      : ["-12vh", "-25vh", "-21vh", "-26vh", "-32vh"]
   );
   const plate1Rotate = useTransform(
     scrollYProgress,
@@ -231,17 +232,17 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["34vw", "26vw", "22vw", "26vw", "32vw"]
+      ? ["36vw", "30vw", "26vw", "29vw", "35vw"]
       : isTablet
-      ? ["38vw", "30vw", "26vw", "30vw", "36vw"]
-      : ["44vw", "34vw", "28vw", "33vw", "40vw"]
+        ? ["40vw", "34vw", "30vw", "33vw", "38vw"]
+        : ["46vw", "37vw", "32vw", "36vw", "42vw"]
   );
   const plate2Y = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["-24vh", "-22vh", "-18vh", "-20vh", "-26vh"]
-      : ["-28vh", "-23vh", "-18vh", "-22vh", "-27vh"]
+      ? ["-27vh", "-26vh", "-23vh", "-25vh", "-29vh"]
+      : ["-31vh", "-28vh", "-25vh", "-27vh", "-31vh"]
   );
   const plate2Rotate = useTransform(
     scrollYProgress,
@@ -264,17 +265,17 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["36vw", "30vw", "26vw", "24vw", "30vw"]
+      ? ["38vw", "32vw", "28vw", "28vw", "33vw"]
       : isTablet
-      ? ["40vw", "34vw", "30vw", "28vw", "34vw"]
-      : ["46vw", "38vw", "33vw", "31vw", "37vw"]
+        ? ["42vw", "37vw", "33vw", "32vw", "37vw"]
+        : ["48vw", "40vw", "36vw", "35vw", "40vw"]
   );
   const plate3Y = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["6vh", "4vh", "10vh", "16vh", "22vh"]
-      : ["8vh", "6vh", "13vh", "21vh", "26vh"]
+      ? ["13vh", "14vh", "17vh", "21vh", "25vh"]
+      : ["15vh", "16vh", "20vh", "25vh", "29vh"]
   );
   const plate3Rotate = useTransform(
     scrollYProgress,
@@ -299,15 +300,15 @@ export default function ShareTheCrunchSection() {
     isMobile
       ? ["10vw", "6vw", "2vw", "-2vw", "0vw"]
       : isTablet
-      ? ["10vw", "6vw", "3vw", "-2vw", "0vw"]
-      : ["12vw", "8vw", "4vw", "-2vw", "0vw"]
+        ? ["10vw", "6vw", "3vw", "-2vw", "0vw"]
+        : ["12vw", "8vw", "4vw", "-2vw", "0vw"]
   );
   const plate4Y = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["38vh", "30vh", "24vh", "26vh", "30vh"]
-      : ["46vh", "34vh", "26vh", "28vh", "33vh"]
+      ? ["40vh", "32vh", "27vh", "29vh", "33vh"]
+      : ["48vh", "36vh", "28vh", "30vh", "35vh"]
   );
   const plate4Rotate = useTransform(
     scrollYProgress,
@@ -330,17 +331,17 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["-34vw", "-28vw", "-24vw", "-22vw", "-28vw"]
+      ? ["-36vw", "-30vw", "-26vw", "-24vw", "-30vw"]
       : isTablet
-      ? ["-38vw", "-32vw", "-27vw", "-25vw", "-32vw"]
-      : ["-42vw", "-34vw", "-29vw", "-27vw", "-35vw"]
+        ? ["-40vw", "-34vw", "-29vw", "-27vw", "-34vw"]
+        : ["-45vw", "-37vw", "-32vw", "-30vw", "-37vw"]
   );
   const plate5Y = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["24vh", "18vh", "14vh", "20vh", "24vh"]
-      : ["28vh", "20vh", "15vh", "23vh", "27vh"]
+      ? ["26vh", "20vh", "16vh", "22vh", "26vh"]
+      : ["30vh", "22vh", "17vh", "25vh", "29vh"]
   );
   const plate5Rotate = useTransform(
     scrollYProgress,
@@ -371,7 +372,7 @@ export default function ShareTheCrunchSection() {
       ref={containerRef}
       id="share-the-crunch"
       aria-label="Chai in one hand, Khakhra in the other. That's the Eat Hit way."
-      className="relative w-full bg-[#F2F0E6] overflow-x-clip select-none h-[280svh] md:h-[320svh]"
+      className="relative w-full bg-[#F2F0E6] overflow-x-clip select-none h-[340svh] md:h-[390svh]"
     >
       {/* ==================================================================== */}
       {/* STICKY 100svh INNER STAGE                                            */}
@@ -419,7 +420,8 @@ export default function ShareTheCrunchSection() {
         </motion.div>
 
         {/* ================================================================== */}
-        {/* STAGE 2: CENTRAL EDITORIAL HEADLINE (BAVET OUTLINE + SOLID COMBO)  */}
+        {/* STAGE 2: CENTRAL SINE-WAVE BANNER HEADLINE (BAVET FLAG RIPPLE)     */}
+        {/* Continuous real-time wave distortion on hollow + solid canvas text */}
         {/* ================================================================== */}
         <motion.div
           style={{
@@ -430,29 +432,11 @@ export default function ShareTheCrunchSection() {
           }}
           className="absolute inset-0 flex flex-col items-center justify-center text-center z-15 px-4 pointer-events-none select-none"
         >
-          {/* Top Line: OUTLINED RED TEXT (THE ULTIMATE) */}
-          <div
-            className="font-[family-name:var(--font-bebas)] font-black uppercase tracking-tight leading-[0.84] select-none text-center text-[clamp(3.8rem,11.8vw,11.2rem)]"
-            style={{
-              WebkitTextStroke: "clamp(2px, 0.28vw, 3.8px) #C33130",
-              color: "transparent",
-              letterSpacing: "0.02em",
-              willChange: "transform",
-            }}
-          >
-            THE ULTIMATE
-          </div>
-
-          {/* Bottom Line: SOLID RED TEXT (CRUNCH) */}
-          <div
-            className="font-[family-name:var(--font-bebas)] font-black uppercase tracking-tight leading-[0.84] text-[#C33130] select-none text-center text-[clamp(3.8rem,11.8vw,11.2rem)] -mt-[0.05em]"
-            style={{
-              letterSpacing: "0.02em",
-              willChange: "transform",
-            }}
-          >
-            CRUNCH
-          </div>
+          <BavetWaveText
+            line1="THE ULTIMATE"
+            line2="CRUNCH"
+            className="w-full max-w-[1240px]"
+          />
         </motion.div>
 
         {/* ================================================================== */}
@@ -478,8 +462,8 @@ export default function ShareTheCrunchSection() {
               <motion.div
                 style={{
                   rotate: transforms.rotate,
-                  width: "clamp(210px, 22vw, 360px)",
-                  height: "clamp(210px, 22vw, 360px)",
+                  width: "clamp(230px, 24vw, 390px)",
+                  height: "clamp(230px, 24vw, 390px)",
                   filter: "drop-shadow(0 14px 24px rgba(74, 45, 35, 0.16))",
                 }}
                 className="relative block rounded-full select-none"
@@ -511,8 +495,8 @@ export default function ShareTheCrunchSection() {
           className="absolute inset-0 flex flex-col items-center justify-center text-center z-30 px-4 select-none"
         >
           {/* Exact approved final CTA headline */}
-          <h3 className="font-[family-name:var(--font-bebas)] font-black uppercase text-[#C33130] tracking-tight leading-[0.88] text-[clamp(3.4rem,9.5vw,8.8rem)] m-0">
-            FIND YOUR CRUNCH.
+          <h3 className="font-[family-name:var(--font-bebas)] font-black uppercase text-[#C33130] tracking-tight leading-[0.88] text-[clamp(4rem,11vw,10.5rem)] m-0">
+            FIND YOUR CRUNCH
           </h3>
         </motion.div>
       </div>
