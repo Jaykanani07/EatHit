@@ -23,37 +23,39 @@ export default function BavetWaveText({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return;
+    // Fixed high-resolution canvas coordinates
+    const CANVAS_WIDTH = 2000;
+    const CANVAS_HEIGHT = 900;
+
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
 
     // Offscreen buffer canvas to hold unwarped crisp vector text
     if (!bufferRef.current) {
       bufferRef.current = document.createElement("canvas");
     }
     const buffer = bufferRef.current;
-    buffer.width = 1800;
-    buffer.height = 850;
-    canvas.width = 1800;
-    canvas.height = 850;
+    buffer.width = CANVAS_WIDTH;
+    buffer.height = CANVAS_HEIGHT;
 
     const bCtx = buffer.getContext("2d", { alpha: true });
     if (!bCtx) return;
 
     function drawSourceText() {
       if (!bCtx) return;
-      bCtx.clearRect(0, 0, buffer.width, buffer.height);
+      bCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       bCtx.textAlign = "center";
       bCtx.textBaseline = "middle";
 
       // Authentic tall condensed display font matching Bavet
-      bCtx.font = 'normal 260px "Bebas Neue", var(--font-bebas), "Anton", Impact, sans-serif';
+      bCtx.font = 'normal 280px "Bebas Neue", "Anton", Impact, sans-serif';
 
-      const cx = buffer.width / 2;
+      const cx = CANVAS_WIDTH / 2;
       const yTop = 330;
-      const yBottom = 525;
+      const yBottom = 570;
 
       // Top Line: Hollow Outline ("THE ULTIMATE") with fine, crisp border
-      bCtx.lineWidth = 3.2;
+      bCtx.lineWidth = 3.6;
       bCtx.strokeStyle = "#C33130";
       bCtx.strokeText(line1, cx, yTop);
 
@@ -62,11 +64,14 @@ export default function BavetWaveText({
       bCtx.fillText(line2, cx, yBottom);
     }
 
-    // Initial draw
+    // Initial draw (falls back to Impact if web font is downloading)
     drawSourceText();
 
-    // Redraw once Google Fonts finish loading to ensure Bebas Neue renders
+    // Redraw as soon as Bebas Neue or Anton finishes loading
     if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.load('280px "Bebas Neue"').then(() => {
+        drawSourceText();
+      });
       document.fonts.ready.then(() => {
         drawSourceText();
       });
@@ -78,29 +83,29 @@ export default function BavetWaveText({
     const amplitudeY = 18; // Vertical wave displacement (flag ripple)
     const amplitudeScale = 0.038; // 3D depth expansion/contraction
     const frequency = 0.005; // Wave width across the letters
-    const speed = 0.028; // Lazy, continuous floating banner wave motion
+    const speed = 0.03; // Smooth continuous waving banner motion
 
     function renderWave() {
       if (!canvas || !buffer) return;
       const renderCtx = canvas.getContext("2d");
       if (!renderCtx) return;
 
-      renderCtx.clearRect(0, 0, canvas.width, canvas.height);
+      renderCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      for (let x = 0; x < canvas.width; x += sliceWidth) {
+      for (let x = 0; x < CANVAS_WIDTH; x += sliceWidth) {
         const wave = Math.sin(x * frequency + time);
         const yOffset = wave * amplitudeY;
         const scaleY = 1 + Math.cos(x * frequency + time) * amplitudeScale;
 
-        const destHeight = canvas.height * scaleY;
-        const destY = (canvas.height - destHeight) / 2 + yOffset;
+        const destHeight = CANVAS_HEIGHT * scaleY;
+        const destY = (CANVAS_HEIGHT - destHeight) / 2 + yOffset;
 
         renderCtx.drawImage(
           buffer,
           x,
           0,
           sliceWidth,
-          buffer.height, // Source vertical slice
+          CANVAS_HEIGHT, // Source vertical slice
           x,
           destY,
           sliceWidth,
@@ -123,7 +128,7 @@ export default function BavetWaveText({
 
   return (
     <div
-      className={`relative flex items-center justify-center pointer-events-none select-none ${className}`}
+      className={`relative w-full flex items-center justify-center pointer-events-none select-none ${className}`}
       style={{
         ...style,
         perspective: "1000px",
@@ -137,10 +142,10 @@ export default function BavetWaveText({
       {/* 2D Canvas with continuous Sine-Wave flag ripple and subtle 3D poster tilt */}
       <canvas
         ref={canvasRef}
-        className="w-full max-w-[1180px] h-auto drop-shadow-[0_12px_24px_rgba(195,49,48,0.12)]"
+        className="w-full max-w-[1200px] h-auto drop-shadow-[0_16px_32px_rgba(195,49,48,0.12)]"
         style={{
-          aspectRatio: "1800 / 850",
-          transform: "perspective(1000px) rotateX(4.5deg) rotateY(-6.5deg) rotateZ(-1.8deg)",
+          aspectRatio: "2000 / 900",
+          transform: "perspective(1000px) rotateX(4deg) rotateY(-6deg) rotateZ(-1.5deg)",
           transformStyle: "preserve-3d",
           willChange: "transform",
         }}
@@ -148,4 +153,3 @@ export default function BavetWaveText({
     </div>
   );
 }
-
