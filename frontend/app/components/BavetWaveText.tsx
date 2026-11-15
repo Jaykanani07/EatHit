@@ -92,39 +92,39 @@ export default function BavetWaveText({
 
       renderCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      for (let x = 0; x < CANVAS_WIDTH; x += sliceWidth) {
-        const wave = Math.sin(x * frequency + time);
-        const yOffset = wave * amplitudeY;
-        const scaleY = 1 + Math.cos(x * frequency + time) * amplitudeScale;
+        for (let x = 0; x < CANVAS_WIDTH; x += sliceWidth) {
+          const wave = Math.sin(x * frequency + time);
+          const yOffset = wave * amplitudeY;
+          const scaleY = 1 + Math.cos(x * frequency + time) * amplitudeScale;
 
-        const destHeight = CANVAS_HEIGHT * scaleY;
-        const destY = (CANVAS_HEIGHT - destHeight) / 2 + yOffset;
+          const destHeight = CANVAS_HEIGHT * scaleY;
+          const destY = (CANVAS_HEIGHT - destHeight) / 2 + yOffset;
 
-        renderCtx.drawImage(
-          buffer,
-          x,
-          0,
-          sliceWidth,
-          CANVAS_HEIGHT, // Source vertical slice
-          x,
-          destY,
-          sliceWidth,
-          destHeight // Warped destination slice
-        );
+          renderCtx.drawImage(
+            buffer,
+            x,
+            0,
+            sliceWidth,
+            CANVAS_HEIGHT, // Source vertical slice
+            x,
+            destY,
+            sliceWidth,
+            destHeight // Warped destination slice
+          );
+        }
+
+        time += speed;
+        animRef.current = requestAnimationFrame(renderWave);
       }
 
-      time += speed;
-      animRef.current = requestAnimationFrame(renderWave);
-    }
+      renderWave();
 
-    renderWave();
-
-    return () => {
-      if (animRef.current) {
-        cancelAnimationFrame(animRef.current);
-      }
-    };
-  }, [line1, line2]);
+      return () => {
+        if (animRef.current) {
+          cancelAnimationFrame(animRef.current);
+        }
+      };
+    }, [line1, line2]);
 
   return (
     <div
