@@ -15,6 +15,9 @@ export default function Home() {
 
       {/* 3. Third Section: Share The Crunch (Bavet-inspired Khakhra Plates & Stacked Typography) */}
       <ShareTheCrunchSection />
+
+      {/* Bottom breathing space so the full bottom plate has natural scroll room */}
+      <div className="w-full h-[14vh] bg-[#F2F0E6]" aria-hidden="true" />
     </main>
   );
 }

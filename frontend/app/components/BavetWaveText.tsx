@@ -23,7 +23,7 @@ export default function BavetWaveText({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Fixed high-resolution canvas coordinates
+    // High-resolution canvas coordinate system
     const CANVAS_WIDTH = 2000;
     const CANVAS_HEIGHT = 900;
 
@@ -47,31 +47,54 @@ export default function BavetWaveText({
       bCtx.textAlign = "center";
       bCtx.textBaseline = "middle";
 
-      // Authentic tall condensed display font matching Bavet
-      bCtx.font = 'normal 280px "Bebas Neue", "Anton", Impact, sans-serif';
+      // IMPORTANT: Standard CSS font string ONLY. Never include var(--...) in canvas font.
+      bCtx.font = 'normal 290px "Krisha", "Bebas Neue", "Anton", Impact, sans-serif';
+
+      try {
+        bCtx.letterSpacing = "6px";
+      } catch {
+        // letterSpacing fallback for older browsers
+      }
 
       const cx = CANVAS_WIDTH / 2;
-      const yTop = 330;
-      const yBottom = 570;
+      const yTop = 320;
+      const yBottom = 590;
 
-      // Top Line: Hollow Outline ("THE ULTIMATE") with fine, crisp border
-      bCtx.lineWidth = 3.6;
+      // Top Line: Hollow Outline ("THE ULTIMATE") with crisp, bold red border line matching Bavet
+      bCtx.lineWidth = 4.2;
       bCtx.strokeStyle = "#C33130";
+      bCtx.lineJoin = "miter";
+      bCtx.miterLimit = 2;
       bCtx.strokeText(line1, cx, yTop);
 
-      // Bottom Line: Solid Fill ("CRUNCH")
+      // Bottom Line: Solid Fill ("CRUNCH") matching Bavet
       bCtx.fillStyle = "#C33130";
       bCtx.fillText(line2, cx, yBottom);
     }
 
-    // Initial draw (falls back to Impact if web font is downloading)
+    // Initial draw
     drawSourceText();
 
-    // Redraw as soon as Bebas Neue or Anton finishes loading
+    // 1. Explicitly load Krisha font into document.fonts to ensure immediate vector rendering
+    if (typeof window !== "undefined" && typeof FontFace !== "undefined") {
+      try {
+        const krishaFont = new FontFace(
+          "Krisha",
+          "url(/images/bavet/Krisha-Regular.woff2)"
+        );
+        krishaFont.load().then((font) => {
+          document.fonts.add(font);
+          drawSourceText();
+        }).catch(() => {
+          // Fallback font already rendered
+        });
+      } catch {
+        // Fallback for browsers without FontFace constructor
+      }
+    }
+
+    // 2. Redraw as soon as all fonts are ready in the document
     if (typeof document !== "undefined" && document.fonts) {
-      document.fonts.load('280px "Bebas Neue"').then(() => {
-        drawSourceText();
-      });
       document.fonts.ready.then(() => {
         drawSourceText();
       });
@@ -92,62 +115,57 @@ export default function BavetWaveText({
 
       renderCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        for (let x = 0; x < CANVAS_WIDTH; x += sliceWidth) {
-          const wave = Math.sin(x * frequency + time);
-          const yOffset = wave * amplitudeY;
-          const scaleY = 1 + Math.cos(x * frequency + time) * amplitudeScale;
+      for (let x = 0; x < CANVAS_WIDTH; x += sliceWidth) {
+        const wave = Math.sin(x * frequency + time);
+        const yOffset = wave * amplitudeY;
+        const scaleY = 1 + Math.cos(x * frequency + time) * amplitudeScale;
 
-          const destHeight = CANVAS_HEIGHT * scaleY;
-          const destY = (CANVAS_HEIGHT - destHeight) / 2 + yOffset;
+        const destHeight = CANVAS_HEIGHT * scaleY;
+        const destY = (CANVAS_HEIGHT - destHeight) / 2 + yOffset;
 
-          renderCtx.drawImage(
-            buffer,
-            x,
-            0,
-            sliceWidth,
-            CANVAS_HEIGHT, // Source vertical slice
-            x,
-            destY,
-            sliceWidth,
-            destHeight // Warped destination slice
-          );
-        }
-
-        time += speed;
-        animRef.current = requestAnimationFrame(renderWave);
+        renderCtx.drawImage(
+          buffer,
+          x,
+          0,
+          sliceWidth,
+          CANVAS_HEIGHT, // Source vertical slice
+          x,
+          destY,
+          sliceWidth,
+          destHeight // Warped destination slice
+        );
       }
 
-      renderWave();
+      time += speed;
+      animRef.current = requestAnimationFrame(renderWave);
+    }
 
-      return () => {
-        if (animRef.current) {
-          cancelAnimationFrame(animRef.current);
-        }
-      };
-    }, [line1, line2]);
+    renderWave();
+
+    return () => {
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+      }
+    };
+  }, [line1, line2]);
 
   return (
     <div
       className={`relative w-full flex items-center justify-center pointer-events-none select-none ${className}`}
-      style={{
-        ...style,
-        perspective: "1000px",
-      }}
+      style={style}
     >
       {/* Screen reader & SEO accessibility */}
       <h2 className="sr-only">
         {line1} {line2}
       </h2>
 
-      {/* 2D Canvas with continuous Sine-Wave flag ripple and subtle 3D poster tilt */}
+      {/* 2D Canvas centered dead in the middle without asymmetric tilting */}
       <canvas
         ref={canvasRef}
-        className="w-full max-w-[1200px] h-auto drop-shadow-[0_16px_32px_rgba(195,49,48,0.12)]"
+        className="w-full max-w-[1240px] h-auto drop-shadow-[0_16px_32px_rgba(195,49,48,0.12)]"
         style={{
           aspectRatio: "2000 / 900",
-          transform: "perspective(1000px) rotateX(4deg) rotateY(-6deg) rotateZ(-1.5deg)",
-          transformStyle: "preserve-3d",
-          willChange: "transform",
+          transform: "none",
         }}
       />
     </div>

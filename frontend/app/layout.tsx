@@ -5,21 +5,18 @@ import "./globals.css";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 const caveat = Caveat({
   variable: "--font-caveat",
   subsets: ["latin"],
-  weight: ["600", "700"],
   display: "swap",
 });
 
@@ -56,8 +53,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&display=swap"
-          rel="stylesheet"
+          rel="preload"
+          href="/images/bavet/Krisha-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
         />
       </head>
       <body className="relative min-h-full bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white">

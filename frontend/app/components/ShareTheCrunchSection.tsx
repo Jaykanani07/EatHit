@@ -113,6 +113,7 @@ export default function ShareTheCrunchSection() {
   // Screen size detection
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [hoveredPlateIndex, setHoveredPlateIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -165,7 +166,7 @@ export default function ShareTheCrunchSection() {
   const headlineY = useTransform(
     scrollYProgress,
     [0.18, 0.26, 0.72, 0.80],
-    prefersReducedMotion ? [0, 0, 0, 0] : [50, 0, 0, -40]
+    prefersReducedMotion ? ["-4.5vh", "-4.5vh", "-4.5vh", "-4.5vh"] : ["-1vh", "-4.5vh", "-4.5vh", "-4.5vh"]
   );
   const headlineDisplay = useTransform(scrollYProgress, (v) =>
     v >= 0.18 && v <= 0.82 ? "flex" : "none"
@@ -185,7 +186,7 @@ export default function ShareTheCrunchSection() {
   const ctaY = useTransform(
     scrollYProgress,
     [0.76, 0.84, 1.0],
-    prefersReducedMotion ? [0, 0, 0] : [40, 0, 0]
+    prefersReducedMotion ? ["-4.5vh", "-4.5vh", "-4.5vh"] : ["-1vh", "-4.5vh", "-4.5vh"]
   );
   const ctaDisplay = useTransform(scrollYProgress, (v) => (v >= 0.74 ? "flex" : "none"));
 
@@ -208,8 +209,8 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["-16vh", "-26vh", "-22vh", "-26vh", "-30vh"]
-      : ["-12vh", "-25vh", "-21vh", "-26vh", "-32vh"]
+      ? ["-16vh", "-26vh", "-22vh", "-26vh", "-28vh"]
+      : ["-12vh", "-25vh", "-21vh", "-26vh", "-29vh"]
   );
   const plate1Rotate = useTransform(
     scrollYProgress,
@@ -241,8 +242,8 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["-27vh", "-26vh", "-23vh", "-25vh", "-29vh"]
-      : ["-31vh", "-28vh", "-25vh", "-27vh", "-31vh"]
+      ? ["-27vh", "-26vh", "-23vh", "-25vh", "-28vh"]
+      : ["-31vh", "-28vh", "-25vh", "-27vh", "-29vh"]
   );
   const plate2Rotate = useTransform(
     scrollYProgress,
@@ -274,8 +275,8 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["13vh", "14vh", "17vh", "21vh", "25vh"]
-      : ["15vh", "16vh", "20vh", "25vh", "29vh"]
+      ? ["13vh", "14vh", "17vh", "21vh", "22vh"]
+      : ["15vh", "16vh", "20vh", "25vh", "22vh"]
   );
   const plate3Rotate = useTransform(
     scrollYProgress,
@@ -294,6 +295,7 @@ export default function ShareTheCrunchSection() {
   );
 
   // Plate 4: Lasan Khakhra (Bottom-Center / Lower-Right)
+  // Glides smoothly up from 42vh to 26vh as user scrolls to the bottom
   const plate4X = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
@@ -307,8 +309,8 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["40vh", "32vh", "27vh", "29vh", "33vh"]
-      : ["48vh", "36vh", "28vh", "30vh", "35vh"]
+      ? ["46vh", "42vh", "38vh", "40vh", "26vh"]
+      : ["52vh", "46vh", "40vh", "42vh", "26vh"]
   );
   const plate4Rotate = useTransform(
     scrollYProgress,
@@ -340,8 +342,8 @@ export default function ShareTheCrunchSection() {
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
     isMobile
-      ? ["26vh", "20vh", "16vh", "22vh", "26vh"]
-      : ["30vh", "22vh", "17vh", "25vh", "29vh"]
+      ? ["26vh", "20vh", "16vh", "22vh", "22vh"]
+      : ["30vh", "22vh", "17vh", "25vh", "22vh"]
   );
   const plate5Rotate = useTransform(
     scrollYProgress,
@@ -351,12 +353,12 @@ export default function ShareTheCrunchSection() {
   const plate5Scale = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
-    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.8, 0.96, 1.02, 0.98, 0.9]
+    prefersReducedMotion ? [1, 1, 1, 1, 1] : [0.78, 0.94, 1.02, 0.98, 0.88]
   );
   const plate5Opacity = useTransform(
     scrollYProgress,
     [0, 0.25, 0.5, 0.75, 1],
-    [0.7, 1, 1, 1, 0.8]
+    [0.5, 1, 1, 1, 0.85]
   );
 
   const plateTransforms = [
@@ -372,7 +374,7 @@ export default function ShareTheCrunchSection() {
       ref={containerRef}
       id="share-the-crunch"
       aria-label="Chai in one hand, Khakhra in the other. That's the Eat Hit way."
-      className="relative w-full bg-[#F2F0E6] overflow-x-clip select-none h-[340svh] md:h-[390svh]"
+      className="relative w-full bg-[#F2F0E6] overflow-x-clip select-none h-[420svh] md:h-[480svh]"
     >
       {/* ==================================================================== */}
       {/* STICKY 100svh INNER STAGE                                            */}
@@ -398,24 +400,24 @@ export default function ShareTheCrunchSection() {
             scale: introScale,
             display: introDisplay,
           }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center z-25 px-4 max-w-5xl mx-auto"
+          className="absolute inset-0 flex flex-col items-center justify-center text-center z-25 px-4 max-w-5xl mx-auto pointer-events-none select-none"
         >
-          {/* Subtle top radiating burst motif */}
-          <div className="w-16 h-8 sm:w-20 sm:h-10 mb-2 pointer-events-none flex items-center justify-center text-[#C33130] opacity-80">
-            <svg viewBox="0 0 100 45" fill="none" className="w-full h-full">
-              <line x1="20" y1="40" x2="30" y2="25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <line x1="38" y1="35" x2="44" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <line x1="50" y1="32" x2="50" y2="8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-              <line x1="62" y1="35" x2="56" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <line x1="80" y1="40" x2="70" y2="25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          {/* Subtle top radiating burst motif matching Bavet */}
+          <div className="w-12 h-6 sm:w-14 sm:h-7 mb-3 pointer-events-none flex items-center justify-center text-[#C33130]">
+            <svg viewBox="0 0 40 22" fill="none" className="w-full h-full">
+              <line x1="10" y1="20" x2="16" y2="4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+              <line x1="20" y1="20" x2="20" y2="2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+              <line x1="30" y1="20" x2="24" y2="4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
             </svg>
           </div>
 
-          {/* Exact approved introductory headline */}
-          <h2 className="text-[clamp(2.4rem,6.8vw,6.4rem)] font-black uppercase text-[#C33130] font-[family-name:var(--font-bebas)] tracking-tight leading-[0.92] text-center m-0">
-            <span className="block">CHAI IN ONE HAND,</span>
-            <span className="block mt-0.5 sm:mt-1">KHAKHRA IN THE OTHER.</span>
-            <span className="block mt-0.5 sm:mt-1">THAT&apos;S THE EAT HIT WAY.</span>
+          {/* Introductory headline with Krisha typography and authentic border line text on line 2 */}
+          <h2 className="text-[clamp(2.5rem,7vw,6.8rem)] font-['Krisha',var(--font-bebas),Impact,sans-serif] uppercase tracking-tight leading-[0.88] text-center m-0 font-normal">
+            <span className="block text-[#C33130]">CHAI IN ONE HAND,</span>
+            <span className="block mt-1 sm:mt-2 bavet-outline-text">
+              KHAKHRA IN THE OTHER.
+            </span>
+            <span className="block mt-1 sm:mt-2 text-[#C33130]">THAT&apos;S THE EAT HIT WAY.</span>
           </h2>
         </motion.div>
 
@@ -441,10 +443,11 @@ export default function ShareTheCrunchSection() {
 
         {/* ================================================================== */}
         {/* STAGE 3: THE 5 REAL KHAKHRA PLATES                                 */}
-        {/* Scroll-choreographed floating plates (pure presentation)           */}
+        {/* Scroll-choreographed floating plates with interactive rotate & scale on hover/hold */}
         {/* ================================================================== */}
         {FLAVOUR_PLATES.map((plate, index) => {
           const transforms = plateTransforms[index];
+          const isHovered = hoveredPlateIndex === index;
 
           return (
             <motion.div
@@ -456,27 +459,61 @@ export default function ShareTheCrunchSection() {
                 scale: transforms.scale,
                 opacity: transforms.opacity,
               }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[20]"
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto select-none ${
+                isHovered ? "z-[35]" : "z-[20]"
+              }`}
+              onMouseEnter={() => setHoveredPlateIndex(index)}
+              onMouseLeave={() => setHoveredPlateIndex(null)}
+              onClick={() =>
+                setHoveredPlateIndex(hoveredPlateIndex === index ? null : index)
+              }
             >
-              {/* Inner Plate Graphic: Rotates with scroll */}
+              {/* Outer Plate Graphic: Rotates with scroll path */}
               <motion.div
                 style={{
                   rotate: transforms.rotate,
                   width: "clamp(230px, 24vw, 390px)",
                   height: "clamp(230px, 24vw, 390px)",
-                  filter: "drop-shadow(0 14px 24px rgba(74, 45, 35, 0.16))",
                 }}
                 className="relative block rounded-full select-none"
               >
-                {/* 100% Real Photographic Khakhra on Plate Asset (Clean transparent PNG) */}
-                <Image
-                  src={plate.image}
-                  alt={plate.alt}
-                  fill
-                  sizes="(max-width: 768px) 190px, (max-width: 1200px) 290px, 360px"
-                  className="object-contain pointer-events-none select-none"
-                  priority={index < 3}
-                />
+                {/* Inner Plate Graphic: Interactive 90-degree rotate & 1.15x scale spring on hover/hold (Same as Bavet dishes) */}
+                <motion.div
+                  animate={{
+                    scale: isHovered ? 1.15 : 1,
+                    rotate: isHovered ? 90 : 0,
+                  }}
+                  whileHover={{
+                    scale: 1.15,
+                    rotate: 90,
+                  }}
+                  whileTap={{
+                    scale: 1.18,
+                    rotate: 105,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 220,
+                    damping: 18,
+                    mass: 0.8,
+                  }}
+                  style={{
+                    filter: isHovered
+                      ? "drop-shadow(0 25px 35px rgba(74, 45, 35, 0.32))"
+                      : "drop-shadow(0 14px 24px rgba(74, 45, 35, 0.16))",
+                  }}
+                  className="relative w-full h-full rounded-full cursor-pointer transition-shadow duration-300"
+                >
+                  {/* 100% Real Photographic Khakhra on Plate Asset (Clean transparent PNG) */}
+                  <Image
+                    src={plate.image}
+                    alt={plate.alt}
+                    fill
+                    sizes="(max-width: 768px) 190px, (max-width: 1200px) 290px, 360px"
+                    className="object-contain pointer-events-none select-none transition-all duration-300"
+                    priority={index < 3}
+                  />
+                </motion.div>
               </motion.div>
             </motion.div>
           );
@@ -492,10 +529,10 @@ export default function ShareTheCrunchSection() {
             scale: ctaScale,
             display: ctaDisplay,
           }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center z-30 px-4 select-none"
+          className="absolute inset-0 flex flex-col items-center justify-center text-center z-30 px-4 select-none pointer-events-none"
         >
-          {/* Exact approved final CTA headline */}
-          <h3 className="font-[family-name:var(--font-bebas)] font-black uppercase text-[#C33130] tracking-tight leading-[0.88] text-[clamp(4rem,11vw,10.5rem)] m-0">
+          {/* Exact approved final CTA headline centered optically & vertically */}
+          <h3 className="font-['Krisha',var(--font-bebas),Impact,sans-serif] uppercase text-[#C33130] tracking-tight leading-none text-[clamp(3.8rem,9.5vw,9.5rem)] m-0 font-normal select-none">
             FIND YOUR CRUNCH
           </h3>
         </motion.div>
