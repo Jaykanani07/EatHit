@@ -33,43 +33,65 @@ export default function Header() {
         </div>
 
         {/* Center: Navigation Links */}
-        <nav className="hidden md:flex items-center justify-center gap-7 lg:gap-9 text-xs sm:text-sm font-semibold text-[#2B1810]">
-          <Link
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            className="relative py-1 text-[#2B1810] font-bold after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#A82810] cursor-pointer"
-          >
-            Home
-          </Link>
-          <a
-            href="#brand-statement"
-            onClick={(e) => {
-              e.preventDefault();
-              document.body.style.overflowY = "";
-              document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors cursor-pointer"
-          >
-            Products
-          </a>
-          <a
-            href="#brand-statement"
-            onClick={(e) => {
-              e.preventDefault();
-              document.body.style.overflowY = "";
-              document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="py-1 text-[#2B1810]/80 hover:text-[#A82810] transition-colors cursor-pointer"
-          >
-            Contact
-          </a>
-        </nav>
+          <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-8 text-xs sm:text-sm font-semibold text-[#2B1810]">
+            <Link
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="relative py-1 text-[#2B1810] font-bold after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#C33130] cursor-pointer hover:text-[#C33130] transition-colors"
+            >
+              Home
+            </Link>
+            <a
+              href="#share-the-crunch"
+              onClick={(e) => {
+                e.preventDefault();
+                document.body.style.overflowY = "";
+                document.getElementById("share-the-crunch")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="py-1 text-[#2B1810]/80 hover:text-[#C33130] transition-colors cursor-pointer"
+            >
+              Flavours
+            </a>
+            <a
+              href="#brand-statement"
+              onClick={(e) => {
+                e.preventDefault();
+                document.body.style.overflowY = "";
+                document.getElementById("brand-statement")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="py-1 text-[#2B1810]/80 hover:text-[#C33130] transition-colors cursor-pointer"
+            >
+              Manifesto
+            </a>
+            <a
+              href="#about-us"
+              onClick={(e) => {
+                e.preventDefault();
+                document.body.style.overflowY = "";
+                document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="py-1 text-[#2B1810]/80 hover:text-[#C33130] transition-colors cursor-pointer font-bold"
+            >
+              About Us
+            </a>
+            <a
+              href="#footer"
+              onClick={(e) => {
+                e.preventDefault();
+                document.body.style.overflowY = "";
+                document.getElementById("footer")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="py-1 text-[#2B1810]/80 hover:text-[#C33130] transition-colors cursor-pointer"
+            >
+              Where to Buy
+            </a>
+          </nav>
 
-        {/* Right Spacer for Symmetrical Nav Centering */}
-        <div className="w-12 h-12 sm:w-13 sm:h-13 pointer-events-none hidden md:block" aria-hidden="true" />
+          {/* Right Spacer for Symmetrical Nav Centering */}
+          <div className="w-12 h-12 sm:w-13 sm:h-13 pointer-events-none hidden md:block" aria-hidden="true" />
       </div>
     </header>
   );
