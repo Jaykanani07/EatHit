@@ -1,7 +1,6 @@
 import TheCrunchOfIndiaHero from "./components/TheCrunchOfIndiaHero";
 import BrandStatementSection from "./components/BrandStatementSection";
 import ShareTheCrunchSection from "./components/ShareTheCrunchSection";
-import AboutUsSection from "./components/AboutUsSection";
 
 export default function Home() {
   return (
@@ -16,9 +15,7 @@ export default function Home() {
 
       {/* 3. Third Section: Share The Crunch (Bavet-inspired Khakhra Plates & Stacked Typography) */}
       <ShareTheCrunchSection />
-
-      {/* 4. Fourth Section: About Us & Gujarati Heritage (Directly below the last section) */}
-      <AboutUsSection />
     </main>
   );
 }
+
