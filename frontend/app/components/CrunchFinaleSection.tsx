@@ -12,11 +12,12 @@ import type Matter from "matter-js";
 
 /* -------------------------------------------------------------------------- */
 /*  EatHit — Closing section: "Good food. Good mood. Zero boring."            */
-/*  A brand-red finale where real khakhra discs rain down, pile up and        */
-/*  react to the cursor, then settle on top of the footer strip.              */
+/*  A brand-red finale where real khakhra discs & pouches rain down,          */
+/*  bounce with true physics, pile up, emit crumbs, and react to cursor.      */
 /* -------------------------------------------------------------------------- */
 
 const PARCHMENT = "#F2F0E6"; // same parchment as sections 2 & 3
+
 const FLAVOURS = [
   { key: "masala", label: "Masala" },
   { key: "methi", label: "Methi" },
@@ -25,9 +26,14 @@ const FLAVOURS = [
   { key: "lasun", label: "Lasun" },
 ] as const;
 
-const POUCH_SRC = "/images/finale/pouch-plain.webp";
-const POUCH_RATIO = 723 / 640; // height / width of pouch-plain.webp
-const POUCH_DROP_INDEX = 5; // the pouch joins the shower as the 6th item
+const POUCHES = [
+  { key: "plain", label: "Plain Khakhra Pouch", src: "/images/finale/pouch-plain.webp", ratio: 723 / 640 },
+  { key: "masala", label: "Masala Khakhra Pouch", src: "/images/finale/pouch-masala.webp", ratio: 581 / 520 },
+  { key: "methi", label: "Methi Khakhra Pouch", src: "/images/finale/pouch-methi.webp", ratio: 584 / 520 },
+  { key: "jeera", label: "Jeera Khakhra Pouch", src: "/images/finale/pouch-jeera.webp", ratio: 584 / 520 },
+  { key: "lasun", label: "Lasun Khakhra Pouch", src: "/images/finale/pouch-lasun.webp", ratio: 585 / 520 },
+] as const;
+
 const CRUMB_COLORS = ["#F2D28B", "#E7A24B", "#C9772B", "#F4E4C1", "#A85A1E"];
 
 /* Deterministic torn-paper edge so server & client markup always match. */
@@ -58,8 +64,9 @@ const OUTLINE_STYLE: React.CSSProperties = {
   letterSpacing: "0.025em",
 };
 
+
 /* -------------------------------------------------------------------------- */
-/*  Physics scene (framework-free; runs entirely against refs)                */
+/*  Physics scene (Matter.js runs directly on DOM refs)                       */
 /* -------------------------------------------------------------------------- */
 
 type Item = {
@@ -100,7 +107,7 @@ function setupScene(
     enableSleeping: true,
     positionIterations: 8,
     velocityIterations: 6,
-    gravity: { x: 0, y: 1.15, scale: 0.001 },
+    gravity: { x: 0, y: 1.18, scale: 0.001 },
   });
 
   let W = 0;
@@ -109,6 +116,7 @@ function setupScene(
   let discCount = 0;
   let total = 0;
   let pouchW = 0;
+  const pouchIndices = new Set<number>();
 
   let walls: Matter.Body[] = [];
   let items: Item[] = [];
@@ -118,7 +126,7 @@ function setupScene(
   let discN = 0;
   let spawned = 0;
   let spawnClock = 0;
-  let nextSpawn = 260;
+  let nextSpawn = 220;
 
   let visible = true;
   let running = false;
@@ -130,15 +138,15 @@ function setupScene(
   let hideTimer = 0;
   let resizeTimer = 0;
 
-  /* ---- hover chip (one reusable element) -------------------------------- */
+  /* ---- hover tooltip chip ------------------------------------------------ */
   const chip = document.createElement("div");
   chip.setAttribute("aria-hidden", "true");
   chip.style.cssText =
     "position:absolute;left:0;top:0;z-index:200;pointer-events:none;opacity:0;" +
-    "transition:opacity .16s ease;will-change:transform;white-space:nowrap;" +
-    `background:${PARCHMENT};color:#C33130;font:700 12px/1 var(--font-jakarta),system-ui,sans-serif;` +
-    "letter-spacing:.02em;padding:7px 12px;border-radius:999px;" +
-    "box-shadow:0 6px 14px rgba(60,6,6,.35);";
+    "transition:opacity .16s ease, transform .08s ease-out;will-change:transform;white-space:nowrap;" +
+    `background:${PARCHMENT};color:#C33130;font:700 12px/1 system-ui,sans-serif;` +
+    "letter-spacing:.02em;padding:7px 13px;border-radius:999px;" +
+    "box-shadow:0 6px 14px rgba(60,6,6,.38);";
   const chipText = document.createElement("span");
   const chipTail = document.createElement("i");
   chipTail.style.cssText = `position:absolute;left:50%;bottom:-4px;width:8px;height:8px;margin-left:-4px;background:${PARCHMENT};transform:rotate(45deg);border-radius:1px;`;
@@ -150,23 +158,34 @@ function setupScene(
     H = stage.clientHeight;
     const wide = W >= 1100;
     const mid = W >= 700 && !wide;
-    D = wide ? Math.min(190, Math.max(100, W * 0.115)) : mid ? Math.max(112, W * 0.13) : 100;
+    D = wide ? Math.min(190, Math.max(105, W * 0.115)) : mid ? Math.max(115, W * 0.13) : 100;
 
-    // Space left for the pile = stage height minus everything above the caption.
     const cap = stage.querySelector<HTMLElement>("[data-finale-caption]");
     const capBottom = cap
       ? cap.getBoundingClientRect().bottom - stage.getBoundingClientRect().top
-      : H * 0.5;
-    const maxPile = Math.max(140, H - capBottom - 28);
+      : H * 0.48;
+    const maxPile = Math.max(140, H - capBottom - 24);
 
-    const base = wide ? 17 : mid ? 12 : 9;
-    const k = wide ? 400 : mid ? 330 : 400;
-    const factor = Math.min(1.8, Math.max(0.6, maxPile / k));
-    discCount = Math.min(22, Math.max(6, Math.round(base * factor)));
-    total = discCount + 1;
+    const base = wide ? 16 : mid ? 12 : 9;
+    const k = wide ? 380 : mid ? 320 : 380;
+    const factor = Math.min(1.8, Math.max(0.65, maxPile / k));
+    discCount = Math.min(20, Math.max(7, Math.round(base * factor)));
 
-    const pouchBase = wide ? W * 0.155 : mid ? W * 0.21 : W * 0.3;
-    pouchW = Math.max(110, Math.min(250, pouchBase, (maxPile * 0.62) / POUCH_RATIO));
+    pouchIndices.clear();
+    if (wide) {
+      pouchIndices.add(3);
+      pouchIndices.add(8);
+      pouchIndices.add(14);
+    } else if (mid) {
+      pouchIndices.add(3);
+      pouchIndices.add(8);
+    } else {
+      pouchIndices.add(3);
+    }
+    total = discCount + pouchIndices.size;
+
+    const pouchBase = wide ? W * 0.15 : mid ? W * 0.20 : W * 0.28;
+    pouchW = Math.max(105, Math.min(235, pouchBase, (maxPile * 0.60) / 1.13));
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     canvas.width = Math.max(1, Math.floor(W * dpr));
@@ -176,18 +195,18 @@ function setupScene(
 
   const buildWalls = () => {
     if (walls.length) Composite.remove(engine.world, walls);
-    const opts = { isStatic: true, friction: 0.6, restitution: 0.1 };
+    const opts = { isStatic: true, friction: 0.6, restitution: 0.12 };
     walls = [
-      Bodies.rectangle(W / 2, H + 50, W * 3, 100, opts),
-      Bodies.rectangle(-50, H / 2, 100, H * 8, opts),
-      Bodies.rectangle(W + 50, H / 2, 100, H * 8, opts),
+      Bodies.rectangle(W / 2, H + 50, W * 3, 100, opts), // floor right at bottom of stage
+      Bodies.rectangle(-60, H / 2, 120, H * 8, opts),     // left wall
+      Bodies.rectangle(W + 60, H / 2, 120, H * 8, opts),  // right wall
     ];
     Composite.add(engine.world, walls);
   };
 
   const shuffledOrder = () => {
     const a = FLAVOURS.map((f) => f.key as string);
-    const list = [...a, ...a, ...a];
+    const list = [...a, ...a, ...a, ...a];
     for (let i = list.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [list[i], list[j]] = [list[j], list[i]];
@@ -198,29 +217,30 @@ function setupScene(
   /* ---- spawning ---------------------------------------------------------- */
   const spawnDisc = (yOffset: number) => {
     const key = order[discN % order.length];
-    const label = FLAVOURS.find((f) => f.key === key)?.label ?? "";
+    const flavour = FLAVOURS.find((f) => f.key === key);
+    const label = flavour ? `${flavour.label} Khakhra` : "Khakhra";
     const idx = discN++;
-    const size = D * (0.82 + Math.random() * 0.3);
+    const size = D * (0.84 + Math.random() * 0.28);
     const r = (size / 2) * 0.93;
-    const x = W * (0.08 + 0.84 * ((idx * 0.618 + Math.random() * 0.12) % 1));
-    const y = -size * 0.8 - yOffset;
+    const x = W * (0.09 + 0.82 * ((idx * 0.618 + Math.random() * 0.12) % 1));
+    const y = -size * 0.85 - yOffset;
 
     const body = Bodies.circle(x, y, r, {
-      restitution: 0.28,
+      restitution: 0.32,
       friction: 0.45,
       frictionStatic: 0.7,
       frictionAir: 0.012,
       density: 0.002,
-      sleepThreshold: 40,
+      sleepThreshold: 45,
     });
     Body.setVelocity(body, {
-      x: (Math.random() - 0.5) * 2.4,
-      y: 2 + Math.random() * 3,
+      x: (Math.random() - 0.5) * 2.6,
+      y: 2.2 + Math.random() * 3.4,
     });
-    Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.24);
+    Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.26);
 
     const wrap = document.createElement("div");
-    wrap.style.cssText = `position:absolute;left:0;top:0;width:${size}px;height:${size}px;will-change:transform;z-index:${10 + items.length};`;
+    wrap.style.cssText = `position:absolute;left:0;top:0;width:${size}px;height:${size}px;will-change:transform;z-index:${10 + items.length};cursor:grab;`;
     const shadow = document.createElement("div");
     shadow.style.cssText = `position:absolute;inset:7%;border-radius:50%;box-shadow:0 ${size * 0.07}px ${size * 0.1}px rgba(58,6,6,.5);`;
     const inner = document.createElement("div");
@@ -244,26 +264,30 @@ function setupScene(
     items.push({ body, wrap, inner, w: size, h: size, label, lx: Infinity, ly: Infinity, la: Infinity });
   };
 
-  const spawnPouch = (yOffset: number) => {
+  const spawnPouch = (pouchNumber: number, yOffset: number) => {
+    const pouchData = POUCHES[pouchNumber % POUCHES.length];
     const w = pouchW;
-    const h = w * POUCH_RATIO;
-    const x = W * (0.62 + Math.random() * 0.14);
-    const body = Bodies.rectangle(x, -h * 0.7 - yOffset, w * 0.8, h * 0.86, {
+    const h = w * pouchData.ratio;
+    const xPos = pouchNumber % 2 === 0
+      ? W * (0.62 + Math.random() * 0.15)
+      : W * (0.24 + Math.random() * 0.16);
+    const x = Math.max(w * 0.55, Math.min(W - w * 0.55, xPos));
+    const body = Bodies.rectangle(x, -h * 0.75 - yOffset, w * 0.8, h * 0.86, {
       chamfer: { radius: 14 },
       density: 0.004,
       friction: 0.6,
       frictionStatic: 0.9,
-      restitution: 0.1,
-      sleepThreshold: 40,
+      restitution: 0.14,
+      sleepThreshold: 45,
     });
-    Body.setAngle(body, 0.2);
-    Body.setInertia(body, Infinity); // stays upright-ish instead of tumbling flat
-    Body.setVelocity(body, { x: 0, y: 2.5 });
+    Body.setAngle(body, (Math.random() - 0.5) * 0.35);
+    Body.setInertia(body, Infinity); // stays upright-ish
+    Body.setVelocity(body, { x: (Math.random() - 0.5) * 1.6, y: 2.6 + Math.random() });
 
     const wrap = document.createElement("div");
-    wrap.style.cssText = `position:absolute;left:0;top:0;width:${w}px;height:${h}px;will-change:transform;z-index:${10 + items.length};`;
+    wrap.style.cssText = `position:absolute;left:0;top:0;width:${w}px;height:${h}px;will-change:transform;z-index:${10 + items.length};cursor:grab;`;
     const img = new window.Image();
-    img.src = POUCH_SRC;
+    img.src = pouchData.src;
     img.alt = "";
     img.draggable = false;
     img.decoding = "async";
@@ -274,12 +298,16 @@ function setupScene(
     layer.appendChild(wrap);
 
     Composite.add(engine.world, body);
-    items.push({ body, wrap, inner: null, w, h, label: "Plain", lx: Infinity, ly: Infinity, la: Infinity });
+    items.push({ body, wrap, inner: null, w, h, label: pouchData.label, lx: Infinity, ly: Infinity, la: Infinity });
   };
 
   const spawnItem = (index: number, yOffset: number) => {
-    if (index === POUCH_DROP_INDEX) spawnPouch(yOffset);
-    else spawnDisc(yOffset);
+    if (pouchIndices.has(index)) {
+      const pIdx = Array.from(pouchIndices).indexOf(index);
+      spawnPouch(pIdx, yOffset);
+    } else {
+      spawnDisc(yOffset);
+    }
   };
 
   /* ---- drawing ----------------------------------------------------------- */
@@ -368,7 +396,7 @@ function setupScene(
     }
   });
 
-  /* ---- main loop --------------------------------------------------------- */
+  /* ---- main physics loop ------------------------------------------------- */
   const frame = (t: number) => {
     if (disposed || !visible) {
       running = false;
@@ -382,7 +410,7 @@ function setupScene(
     while (spawned < total && spawnClock >= nextSpawn) {
       spawnItem(spawned, 0);
       spawned++;
-      nextSpawn += 115 + Math.random() * 45;
+      nextSpawn += 135 + Math.random() * 45;
     }
 
     let n = 0;
@@ -400,7 +428,7 @@ function setupScene(
     const settled =
       spawned >= total && crumbs.length === 0 && items.every((i) => i.body.isSleeping);
     if (settled) {
-      running = false; // fully at rest: stop burning CPU until the cursor wakes it
+      running = false; // fully at rest: save CPU until cursor wakes it
       return;
     }
     raf = requestAnimationFrame(frame);
@@ -413,7 +441,7 @@ function setupScene(
     raf = requestAnimationFrame(frame);
   };
 
-  /* ---- instant, already-settled pile (reduced motion + resize) ----------- */
+  /* ---- instant, pre-settled pile for reduced motion / fast resize -------- */
   const simulateSettled = () => {
     discN = 0;
     order = shuffledOrder();
@@ -433,7 +461,7 @@ function setupScene(
     walls = [];
   };
 
-  /* ---- pointer interaction ------------------------------------------------ */
+  /* ---- pointer interaction (nudge / push) -------------------------------- */
   let lpx = 0;
   let lpy = 0;
   let hasLast = false;
@@ -451,7 +479,7 @@ function setupScene(
   };
 
   const push = (px: number, py: number, dx: number, dy: number, speed: number) => {
-    const reach = 70;
+    const reach = 75;
     for (const it of items) {
       const bx = it.body.position.x;
       const by = it.body.position.y;
@@ -561,7 +589,7 @@ function setupScene(
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Section                                                                   */
+/*  Headline Mask Animation                                                   */
 /* -------------------------------------------------------------------------- */
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -590,6 +618,10 @@ function MaskLine({
     </span>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Main Component                                                            */
+/* -------------------------------------------------------------------------- */
 
 export default function CrunchFinaleSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -698,12 +730,13 @@ export default function CrunchFinaleSection() {
           }}
         />
 
-        {/* Physics layer: khakhra discs + pouch are injected here */}
+        {/* Physics layer: khakhra discs + pouches are injected here */}
         <div
           ref={layerRef}
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-10 overflow-hidden"
         />
+
         {/* Crumb particles */}
         <canvas
           ref={fxRef}
@@ -760,4 +793,3 @@ export default function CrunchFinaleSection() {
     </section>
   );
 }
-

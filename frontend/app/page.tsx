@@ -1,7 +1,7 @@
 import TheCrunchOfIndiaHero from "./components/TheCrunchOfIndiaHero";
 import BrandStatementSection from "./components/BrandStatementSection";
 import ShareTheCrunchSection from "./components/ShareTheCrunchSection";
-import CrunchFinaleSection from "./components/CrunchFinaleSection";
+import CrunchRainSection from "./components/CrunchRainSection";
 
 export default function Home() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
       <ShareTheCrunchSection />
 
       {/* Closing finale: falling khakhra pile + footer */}
-      <CrunchFinaleSection />
+      <CrunchRainSection />
     </main>
   );
 }
