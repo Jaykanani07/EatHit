@@ -34,6 +34,8 @@ export const metadata: Metadata = {
 };
 
 import Header from "./components/Header";
+import Footer from "./components/Footer";
+import CookieConsent from "./components/CookieConsent";
 
 export default function RootLayout({
   children,
@@ -43,6 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${outfit.variable} ${plusJakartaSans.variable} ${caveat.variable} ${bebasNeue.variable} h-full`}
     >
       <head>
@@ -63,6 +66,8 @@ export default function RootLayout({
       <body className="relative min-h-full bg-[#EFE6DC] text-[#2B1810] antialiased selection:bg-[#DC2626] selection:text-white">
         <Header />
         {children}
+        <Footer />
+        <CookieConsent />
       </body>
     </html>
   );
