@@ -203,3 +203,19 @@ body {
 .perspective-1000 {
   perspective: 1000px;
 }
+
+/* Products page: the five packs fanned out like a hand of cards.
+   --i is the pack's offset from the middle (-2..2), --a its tilt. */
+.pack-fan-item {
+  --x: calc(var(--i) * min(150px, 16.5vw));
+  transform: translateX(calc(-50% + var(--x))) rotate(var(--a));
+  transform-origin: 50% 120%;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pack-fan-item:hover,
+.pack-fan-item:focus-visible {
+  transform: translateX(calc(-50% + var(--x))) rotate(var(--a)) translateY(-50px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pack-fan-item { transition: none; }
+}
